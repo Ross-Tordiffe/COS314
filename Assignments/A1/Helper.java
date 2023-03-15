@@ -50,7 +50,7 @@ public class Helper {
                     e.printStackTrace();
                 }
             }
-            if (count == 2)
+            if (count == 1)
                 break;
         }
 
@@ -216,9 +216,11 @@ public class Helper {
                 bins.add(bin);
                 HashMap<Integer, Integer> space = new HashMap<>();
                 space.put(cap - value, bins.size() - 1);
-                spaceAvailable.add(space);
+                insertSpace(spaceAvailable, space);
+                // spaceAvailable.add(space);
             } else {
                 // Add the value to the current bin
+                System.out.println("index: " + index);
                 bins.get(index).add(value);
                 Integer space = spaceAvailable.get(index).keySet().iterator().next();
                 spaceAvailable.get(index).remove(space);
@@ -242,6 +244,14 @@ public class Helper {
 
         int low = 0, high = spaceAvailable.size() - 1, mid = 0;
         Integer space;
+
+        // print the spaceAvailable
+        System.out.print("spaceAvailable: ");
+        for (int i = 0; i < spaceAvailable.size(); i++) {
+            System.out.print("(" + i + ")" +
+                    spaceAvailable.get(i).keySet().iterator().next() + ", ");
+        }
+        System.out.println();
         // If the spaceAvailable is empty, return -1
         if (spaceAvailable.size() == 0)
             return -1;
@@ -261,6 +271,41 @@ public class Helper {
 
         return -1;
 
+    }
+
+    public static void insertSpace(ArrayList<HashMap<Integer, Integer>> spaceAvailable,
+            HashMap<Integer, Integer> spaceToInsert) {
+        int low = 0, high = spaceAvailable.size() - 1, mid = 0;
+        Integer spaceCurrent;
+        Integer spaceNext;
+        // If the spaceAvailable is empty, return -1
+        if (spaceAvailable.size() == 0) {
+            spaceAvailable.add(spaceToInsert);
+            return;
+        }
+        // spaceAvailable is order by space value. Insert the space into the best
+        // location i.e. next to an equal space or between a smaller and larger space
+        while (low <= high) {
+            mid = (low + high) / 2;
+            if (mid == spaceAvailable.size() - 1) {
+                spaceAvailable.add(spaceToInsert);
+                return;
+            }
+            spaceCurrent = spaceAvailable.get(mid).keySet().iterator().next();
+            spaceNext = spaceAvailable.get(mid + 1).keySet().iterator().next();
+
+            if (spaceNext > spaceToInsert.keySet().iterator().next()
+                    && spaceCurrent <= spaceToInsert.keySet().iterator().next()) {
+                spaceAvailable.add(mid + 1, spaceToInsert);
+                return;
+            } else if (spaceCurrent > spaceToInsert.keySet().iterator().next()) {
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        spaceAvailable.add(spaceToInsert);
     }
 
     /**
