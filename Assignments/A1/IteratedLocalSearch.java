@@ -5,38 +5,83 @@ import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
 
 public class IteratedLocalSearch extends Helper {
 
-    private HashMap<String, ArrayList<ArrayList<Integer>>> files;
+    private ArrayList<ArrayList<Integer>> instance;
+    private String instanceName;
     private Integer cap;
-
-    private ArrayList<Double> instanceFitness = new ArrayList<Double>();
+    private Double instanceFitness;
 
     // Constructor
-    public IteratedLocalSearch(HashMap<String, ArrayList<ArrayList<Integer>>> files,
+    public IteratedLocalSearch(ArrayList<ArrayList<Integer>> instance, String instanceName,
             Integer cap) {
 
-        this.files = files;
+        this.instance = instance;
+        this.instanceName = instanceName;
         this.cap = cap;
 
-        // For each instance in the file run 10 swaps and 10 swaps from lowest until
-        // there are 40 or less bin or the swaps are done
-        int index = 0;
-        // for (String key : files.keySet()) {
-        // ArrayList<ArrayList<Integer>> instance = files.get(key);
-        // Integer count = 0;
-        // instanceFitness.add(Fitness(instance));
+        instanceFitness = Fitness(instance);
 
-        // for (int i = 0; i < 10; i++) {
-        // while (count < 50 && instance.size() > 40) {
-        // Swap(instance, index);
-        // count++;
-        // }
+        bestFit();
 
-        // instance = unpackRepack(instance);
-        // }
+        for(int j = 0; j < 50; j++) {
+            for (int i = 0; i < 50; i++) {
+                Swap();
+            }
+            bestFit();
+        }
 
-        index++;
-        // }
+        HashMap<String, ArrayList<ArrayList<Integer>>> results = new HashMap<String, ArrayList<ArrayList<Integer>>>();
+        results.put(this.instanceName, this.instance);
+        printInstance(results);
 
+    }
+
+    /**
+     * 
+     */
+    public void bestFit() {
+
+        System.out.println("Previous: " + Fitness(instance));
+        
+        ArrayList<ArrayList<Integer>> bestList = new ArrayList<ArrayList<Integer>>();
+
+        for (int i = 0; i < instance.size(); i++) {
+            for(int j = 0; j < instance.get(i).size(); j++) {
+                Integer value = instance.get(i).get(j);
+                Integer bestIndex = 0;
+                if(bestList.size() == 0) {
+                    ArrayList<Integer> newList = new ArrayList<Integer>();
+                    newList.add(value);
+                    bestList.add(newList);
+                    continue;
+                }
+                Integer bestSum = sumBin(bestList.get(0)) + value;
+                for (int k = 1; k < bestList.size(); k++) {
+                    Integer sum = sumBin(bestList.get(k)) + value;
+                    if (sum < bestSum) {
+                        bestSum = sum;
+                        bestIndex = k;
+                    }
+                }
+                if (bestSum <= cap) {
+                    bestList.get(bestIndex).add(value);
+                } else {
+                    ArrayList<Integer> newList = new ArrayList<Integer>();
+                    newList.add(value);
+                    bestList.add(newList);
+                }
+            }
+        }
+
+        System.out.println("Best Fit: " + Fitness(bestList));
+
+        if(Fitness(bestList) < Fitness(instance)) {
+            instance = bestList;
+        }
+
+        // HashMap<String, ArrayList<ArrayList<Integer>>> results = new HashMap<String, ArrayList<ArrayList<Integer>>>();
+        // results.put(instanceName, instance);
+        // printInstance(results);
+        
     }
 
     /**
@@ -44,7 +89,7 @@ public class IteratedLocalSearch extends Helper {
      * 
      * @param instance
      */
-    public void Swap(ArrayList<ArrayList<Integer>> instance, Integer instanceIndex) {
+    public void Swap() {
 
         Integer index1 = (int) (Math.random() * instance.size());
         Integer index2 = (int) (Math.random() * instance.size());
@@ -69,26 +114,15 @@ public class IteratedLocalSearch extends Helper {
             item1.set(valueIndex1, value2);
             item2.set(valueIndex2, value1);
 
-            if (Fitness(instance) < instanceFitness.get(instanceIndex)
-                    || Fitness(instance) == instanceFitness.get(instanceIndex)) {
-                instanceFitness.set(instanceIndex, Fitness(instance));
+            Double newFitness = Fitness(instance);
+
+            if (newFitness <= instanceFitness) {
+                instanceFitness = newFitness;
             } else {
                 item1.set(valueIndex1, value1);
                 item2.set(valueIndex2, value2);
             }
         }
-
-    }
-
-    public ArrayList<ArrayList<Integer>> unpackRepack(ArrayList<ArrayList<Integer>> instance) {
-
-        ArrayList<Integer> unpacked = new ArrayList<Integer>();
-        for (int i = 0; i < instance.size(); i++) {
-            unpacked.addAll(instance.get(i));
-            // instance.get(i).clear();
-        }
-
-        return bestFitDecreasing(unpacked, cap);
 
     }
 
