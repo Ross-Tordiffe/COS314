@@ -22,11 +22,14 @@ public class IteratedLocalSearch extends Helper {
 
         bestFit();
 
-        for(int j = 0; j < 50; j++) {
-            for (int i = 0; i < 50; i++) {
-                Swap();
-            }
-            bestFit();
+        for (int j = 0; j < 1; j++) {
+            // for (int i = 0; i < 50; i++) {
+            //     Swap();
+            // }
+            // bestFit();
+            // for (int i = 0; i < 10; i++) {
+            // reshuffleSmallest();
+            // }
         }
 
         HashMap<String, ArrayList<ArrayList<Integer>>> results = new HashMap<String, ArrayList<ArrayList<Integer>>>();
@@ -36,19 +39,19 @@ public class IteratedLocalSearch extends Helper {
     }
 
     /**
-     * 
+     * Best Fit Algorithm
      */
     public void bestFit() {
 
         System.out.println("Previous: " + Fitness(instance));
-        
+
         ArrayList<ArrayList<Integer>> bestList = new ArrayList<ArrayList<Integer>>();
 
         for (int i = 0; i < instance.size(); i++) {
-            for(int j = 0; j < instance.get(i).size(); j++) {
+            for (int j = 0; j < instance.get(i).size(); j++) {
                 Integer value = instance.get(i).get(j);
                 Integer bestIndex = 0;
-                if(bestList.size() == 0) {
+                if (bestList.size() == 0) {
                     ArrayList<Integer> newList = new ArrayList<Integer>();
                     newList.add(value);
                     bestList.add(newList);
@@ -74,14 +77,64 @@ public class IteratedLocalSearch extends Helper {
 
         System.out.println("Best Fit: " + Fitness(bestList));
 
-        if(Fitness(bestList) < Fitness(instance)) {
+        if (Fitness(bestList) < Fitness(instance)) {
             instance = bestList;
         }
 
-        // HashMap<String, ArrayList<ArrayList<Integer>>> results = new HashMap<String, ArrayList<ArrayList<Integer>>>();
-        // results.put(instanceName, instance);
-        // printInstance(results);
-        
+    }
+
+    /**
+     * Finds the best bin to insert a value into the instance
+     * 
+     * @param value
+     */
+    public void bestInsert(Integer value) {
+
+        Integer bestIndex = 0;
+        Integer bestSum = sumBin(instance.get(0)) + value;
+        for (int i = 1; i < instance.size(); i++) {
+            Integer sum = sumBin(instance.get(i)) + value;
+            if (sum < bestSum) {
+                bestSum = sum;
+                bestIndex = i;
+            }
+        }
+        if (bestSum <= cap) {
+            instance.get(bestIndex).add(value);
+        } else {
+            ArrayList<Integer> newList = new ArrayList<Integer>();
+            newList.add(value);
+            instance.add(newList);
+        }
+
+    }
+
+    /*
+     * Finds the bin with the smallest sum and removes it, then reshuffles the
+     * values back into the instance
+     */
+    public void reshuffleSmallest() {
+
+        Integer smallestIndex = 0;
+        Integer smallestSum = sumBin(instance.get(0));
+        for (int i = 1; i < instance.size(); i++) {
+            Integer sum = sumBin(instance.get(i));
+            if (sum < smallestSum) {
+                smallestSum = sum;
+                smallestIndex = i;
+            }
+        }
+
+        ArrayList<Integer> smallestBin = instance.get(smallestIndex);
+        // Swap the smallest bin with the last bin
+        instance.set(smallestIndex, instance.get(instance.size() - 1));
+        instance.set(instance.size() - 1, smallestBin);
+        // Remove the smallest bin
+        instance.remove(instance.size() - 1);
+
+        for (int i = 0; i < smallestBin.size(); i++) {
+            bestInsert(smallestBin.get(i));
+        }
     }
 
     /**
