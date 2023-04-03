@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
+// import atmomic long
+import java.util.concurrent.atomic.AtomicLong;
 
 public class IteratedLocalSearch extends Helper {
 
@@ -9,10 +9,14 @@ public class IteratedLocalSearch extends Helper {
     private String instanceName;
     private Integer cap;
     private Double instanceFitness;
+    private double KEEP_PROBABILITY = 0;
+
+    private Integer binCount = 0;
+    private AtomicLong runtime = new AtomicLong(0);
 
     // Constructor
     public IteratedLocalSearch(ArrayList<ArrayList<Integer>> instance, String instanceName,
-            Integer cap) {
+            Integer cap, Integer iterations, Integer swaps, Integer reshuffles) {
 
         this.instance = instance;
         this.instanceName = instanceName;
@@ -20,30 +24,50 @@ public class IteratedLocalSearch extends Helper {
 
         instanceFitness = Fitness(instance);
 
+        // start timer
+        long startTime = System.currentTimeMillis();
+        long tempTime = startTime;
+
+        // INITIAL SOLUTION
         bestFit();
 
-        for (int j = 0; j < 1; j++) {
-            // for (int i = 0; i < 50; i++) {
-            //     Swap();
-            // }
-            // bestFit();
-            // for (int i = 0; i < 10; i++) {
-            // reshuffleSmallest();
-            // }
+        // PETURBATION + LOCAL SEARCH
+        for (int j = 0; j < iterations; j++) {
+
+            for (int i = 0; i < swaps; i++) {
+                Swap(); // Local Search done after each swap
+            }
+
+            // CONSTRUCT A NEW SOLUTION
+            bestFit();
+            for (int i = 0; i < reshuffles; i++) {
+                reshuffleSmallest();
+            }
         }
 
-        HashMap<String, ArrayList<ArrayList<Integer>>> results = new HashMap<String, ArrayList<ArrayList<Integer>>>();
-        results.put(this.instanceName, this.instance);
-        printInstance(results);
+        runtime = new AtomicLong((System.currentTimeMillis() - startTime));
+        binCount = this.instance.size();
 
+    }
+
+    /**
+     * Returns the runtime of the algorithm
+     */
+    public long getRuntime() {
+        return runtime.get();
+    }
+
+    /**
+     * Returns bin count of the instance
+     */
+    public Integer getBinCount() {
+        return binCount;
     }
 
     /**
      * Best Fit Algorithm
      */
     public void bestFit() {
-
-        System.out.println("Previous: " + Fitness(instance));
 
         ArrayList<ArrayList<Integer>> bestList = new ArrayList<ArrayList<Integer>>();
 
@@ -74,8 +98,6 @@ public class IteratedLocalSearch extends Helper {
                 }
             }
         }
-
-        System.out.println("Best Fit: " + Fitness(bestList));
 
         if (Fitness(bestList) < Fitness(instance)) {
             instance = bestList;
@@ -138,6 +160,26 @@ public class IteratedLocalSearch extends Helper {
     }
 
     /**
+     * Finds a random bin and removes it, then reshuffles the values back into the
+     */
+    public void reshuffleRandom() {
+
+        Integer randomIndex = (int) (Math.random() * instance.size());
+
+        ArrayList<Integer> randomBin = instance.get(randomIndex);
+        // Swap with the last bin
+        instance.set(randomIndex, instance.get(instance.size() - 1));
+        instance.set(instance.size() - 1, randomBin);
+        // Remove the random bin
+        instance.remove(instance.size() - 1);
+
+        for (int i = 0; i < randomBin.size(); i++) {
+            bestInsert(randomBin.get(i));
+        }
+
+    }
+
+    /**
      * Swap two random items in the instance
      * 
      * @param instance
@@ -171,21 +213,15 @@ public class IteratedLocalSearch extends Helper {
 
             if (newFitness <= instanceFitness) {
                 instanceFitness = newFitness;
-            } else {
+            } else { // LOCAL SEARCH
+                if (Math.random() > KEEP_PROBABILITY) {
+                    item1.set(valueIndex1, value1);
+                    item2.set(valueIndex2, value2);
+                }
                 item1.set(valueIndex1, value1);
-                item2.set(valueIndex2, value2);
             }
         }
 
-    }
-
-    public Double Fitness(ArrayList<ArrayList<Integer>> instance) {
-        Double fitness = 0.0;
-        // Calculate the fitness of the instance
-        for (int i = 0; i < instance.size(); i++) {
-            fitness += Math.pow(sumBin(instance.get(i)), 2);
-        }
-        return (1 - fitness / instance.size());
     }
 
 }

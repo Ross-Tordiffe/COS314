@@ -13,7 +13,7 @@ public class Helper {
      * Reads in a file and returns an ArrayList of Integers
      * 
      * @param dirName
-     * @return
+     * @return fileContents
      */
     public static HashMap<String, ArrayList<Integer>> readFiles(String dirName) {
 
@@ -21,14 +21,10 @@ public class Helper {
         File[] files = dir.listFiles();
 
         HashMap<String, ArrayList<Integer>> fileContents = new HashMap<>();
-
-        Integer cap = null;
-        int count = 0;
         ArrayList<Integer> currentFile = null;
 
         for (File file : files) {
-            // Don't include the 1st and 2nd lines of the file
-            count++;
+            // Don't include the 1st line of the file
             if (file.isFile()) {
                 String fileName = file.getName();
                 fileContents.put(fileName, new ArrayList<Integer>());
@@ -37,11 +33,6 @@ public class Helper {
                     BufferedReader br = new BufferedReader(new FileReader(file));
                     String line;
                     br.readLine(); // Skip the first line
-                    if (cap == null) { // Save the capacity of the bin
-                        cap = Integer.parseInt(br.readLine());
-                    } else {
-                        br.readLine(); // Or skip the second line if we already have the capacity
-                    }
                     while ((line = br.readLine()) != null) {
                         currentFile.add(Integer.parseInt(line));
                     }
@@ -50,15 +41,38 @@ public class Helper {
                     e.printStackTrace();
                 }
             }
-            if (count == 1)
-                break;
+
         }
 
-        // Add the capacity of the bin to the back of the ArrayList
-        fileContents.put("cap", new ArrayList<Integer>());
-        fileContents.get("cap").add(cap);
-
         return fileContents;
+    }
+
+    /**
+     * Reads the file containing optimal solutions and returns a HashMap of the
+     * filename and the optimal number of bins
+     * 
+     * @param filepath
+     * @return optimal
+     */
+    public static HashMap<String, Integer> readOptima(String filepath) {
+
+        HashMap<String, Integer> optimal = new HashMap<String, Integer>();
+
+        File file = new File(filepath);
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] split = line.split(" ");
+                optimal.put(split[0], Integer.parseInt(split[1]));
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return optimal;
+
     }
 
     /**
@@ -142,14 +156,15 @@ public class Helper {
     }
 
     /**
-     * Removes the cap from the fileContents hashmap and returns it
+     * Print the number of bins used for each file
      * 
-     * @param values
+     * @param fileContents
+     * @return
      */
-    public static Integer getCap(HashMap<String, ArrayList<Integer>> fileContents) {
-        Integer cap = fileContents.get("cap").get(0);
-        fileContents.remove("cap");
-        return cap;
+    public static void printFinal(HashMap<String, ArrayList<ArrayList<Integer>>> fileContents) {
+        for (String filename : fileContents.keySet()) {
+            System.out.println(filename + ": " + fileContents.get(filename).size());
+        }
     }
 
     public static Integer sumBin(ArrayList<Integer> bin) {
@@ -202,17 +217,45 @@ public class Helper {
      * @return
      */
     public static HashMap<String, ArrayList<ArrayList<Integer>>> organiseInstances(
-            HashMap<String, ArrayList<Integer>> fileContents, Integer cap) {
+            HashMap<String, ArrayList<Integer>> fileContents) {
 
         HashMap<String, ArrayList<ArrayList<Integer>>> instances = new HashMap<>();
 
         for (String fileName : fileContents.keySet()) {
+
             ArrayList<Integer> values = fileContents.get(fileName);
-            values.remove(values.size() - 1);
+            Integer cap = values.remove(0);
+
             instances.put(fileName, firstFitDecreasing(values, cap));
         }
 
         return instances;
+    }
+
+    /**
+     * Removes the cap from the fileContents and returns a HashMap of file names and
+     * capacities
+     */
+    public static HashMap<String, Integer> getCaps(HashMap<String, ArrayList<Integer>> fileContents) {
+        HashMap<String, Integer> caps = new HashMap<>();
+        for (String fileName : fileContents.keySet()) {
+            caps.put(fileName, fileContents.get(fileName).remove(0));
+        }
+        return caps;
+    }
+
+    /**
+     * Determines the fitness of a given instance
+     * 
+     * @param instance
+     * @return
+     */
+    public Double Fitness(ArrayList<ArrayList<Integer>> instance) {
+        Double fitness = 0.0;
+        for (int i = 0; i < instance.size(); i++) {
+            fitness += Math.pow(sumBin(instance.get(i)), 2);
+        }
+        return (1 - fitness / instance.size());
     }
 
 }
