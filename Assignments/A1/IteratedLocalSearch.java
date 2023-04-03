@@ -1,32 +1,25 @@
 import java.util.ArrayList;
-import java.util.HashMap;
-// import atmomic long
 import java.util.concurrent.atomic.AtomicLong;
 
 public class IteratedLocalSearch extends Helper {
 
     private ArrayList<ArrayList<Integer>> instance;
-    private String instanceName;
     private Integer cap;
     private Double instanceFitness;
-    private double KEEP_PROBABILITY = 0;
-
     private Integer binCount = 0;
     private AtomicLong runtime = new AtomicLong(0);
 
     // Constructor
-    public IteratedLocalSearch(ArrayList<ArrayList<Integer>> instance, String instanceName,
+    public IteratedLocalSearch(ArrayList<ArrayList<Integer>> instance,
             Integer cap, Integer iterations, Integer swaps, Integer reshuffles) {
 
         this.instance = instance;
-        this.instanceName = instanceName;
         this.cap = cap;
 
         instanceFitness = Fitness(instance);
 
         // start timer
         long startTime = System.currentTimeMillis();
-        long tempTime = startTime;
 
         // INITIAL SOLUTION
         bestFit();
@@ -214,11 +207,8 @@ public class IteratedLocalSearch extends Helper {
             if (newFitness <= instanceFitness) {
                 instanceFitness = newFitness;
             } else { // LOCAL SEARCH
-                if (Math.random() > KEEP_PROBABILITY) {
-                    item1.set(valueIndex1, value1);
-                    item2.set(valueIndex2, value2);
-                }
                 item1.set(valueIndex1, value1);
+                item2.set(valueIndex2, value2);
             }
         }
 

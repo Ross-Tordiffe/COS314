@@ -1,39 +1,31 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Tabu extends Helper {
 
     private ArrayList<ArrayList<ArrayList<Integer>>> tabuList = new ArrayList<ArrayList<ArrayList<Integer>>>();
     private ArrayList<ArrayList<Integer>> instance;
-    private String instanceName;
-    private ArrayList<ArrayList<Integer>> bestInstance;
     private Integer cap;
-    private Integer tabuSize;
+    private Integer TABU_SIZE = 100;
     private Double instanceFitness;
-    private double KEEP_PROBABILITY = 0;
 
     private Integer binCount = 0;
     private AtomicLong runtime = new AtomicLong(0);
 
     // Constructor
-    public Tabu(ArrayList<ArrayList<Integer>> instance, String instanceName,
+    public Tabu(ArrayList<ArrayList<Integer>> instance,
             Integer cap, Integer iterations, Integer swaps, Integer reshuffles) {
 
         this.instance = instance;
-        this.instanceName = instanceName;
         this.cap = cap;
-        tabuSize = 10;
-
         instanceFitness = Fitness(instance);
 
         // start timer
         long startTime = System.currentTimeMillis();
-        long tempTime = startTime;
 
         // INITIAL SOLUTION
-        greedySort(); // Items are arranged in decreasing order of size, and then packed into bins
-                      // using first fit decreasing
+        bestFit(); // Items are arranged in decreasing order of size, and then packed into bins
+                   // using first fit decreasing
 
         // PETURBATION + LOCAL SEARCH
         for (int j = 0; j < iterations; j++) {
@@ -41,8 +33,6 @@ public class Tabu extends Helper {
                 Swap(); // Has a check within it to see if the new solution is tabu. Will not swap
                         // if it is tabu
             }
-
-            bestInstance = copyInstance();
 
             // CONSTRUCT A NEW SOLUTION
             bestFit();
@@ -187,7 +177,6 @@ public class Tabu extends Helper {
         for (int i = 0; i < randomBin.size(); i++) {
             bestInsert(randomBin.get(i));
         }
-
     }
 
     /**
@@ -223,17 +212,22 @@ public class Tabu extends Helper {
             item1.set(valueIndex1, value2);
             item2.set(valueIndex2, value1);
 
+            if (inTabuList(instance)) {
+                item1.set(valueIndex1, value1);
+                item2.set(valueIndex2, value2);
+                return;
+            }
+
             Double newFitness = Fitness(instance);
 
             if (newFitness <= instanceFitness) {
                 instanceFitness = newFitness;
+                addTabu(instance);
             } else {
-                if (Math.random() > KEEP_PROBABILITY) {
-                    item1.set(valueIndex1, value1);
-                    item2.set(valueIndex2, value2);
-                }
                 item1.set(valueIndex1, value1);
+                item2.set(valueIndex2, value2);
             }
+
         }
 
     }
@@ -255,8 +249,46 @@ public class Tabu extends Helper {
     }
 
     /**
-     * Returns the sum of a bin
+     * Returns true if the instance is has equal values to an instance in the tabu
+     * 
+     * @param instance
+     * @return
      */
+    public boolean inTabuList(ArrayList<ArrayList<Integer>> instance) {
+        for (int i = 0; i < tabuList.size(); i++) {
+            if (tabuList.get(i).size() == instance.size()) {
+                boolean equal = true;
+                for (int j = 0; j < instance.size(); j++) {
+                    if (tabuList.get(i).get(j).size() != instance.get(j).size()) {
+                        equal = false;
+                        break;
+                    }
+                    for (int k = 0; k < instance.get(j).size(); k++) {
+                        if (tabuList.get(i).get(j).get(k) != instance.get(j).get(k)) {
+                            equal = false;
+                            break;
+                        }
+                    }
+                }
+                if (equal) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds a new instance to the tabu list
+     * 
+     * @return
+     */
+    public void addTabu(ArrayList<ArrayList<Integer>> instance) {
+        tabuList.add(copyInstance());
+        if (tabuList.size() > TABU_SIZE) {
+            tabuList.remove(0);
+        }
+    }
 
     /**
      * Returns the runtime of the algorithm
