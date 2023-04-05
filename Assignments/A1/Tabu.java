@@ -6,62 +6,67 @@ public class Tabu extends Helper {
     private ArrayList<ArrayList<ArrayList<Integer>>> tabuList = new ArrayList<ArrayList<ArrayList<Integer>>>();
     private ArrayList<ArrayList<Integer>> instance;
     private Integer cap;
-    private Integer TABU_SIZE = 100;
+    private Integer tabuSize;
     private Double instanceFitness;
-
+    private ArrayList<ArrayList<Integer>> bestInstance;
     private Integer binCount = 0;
     private AtomicLong runtime = new AtomicLong(0);
 
     // Constructor
     public Tabu(ArrayList<ArrayList<Integer>> instance,
-            Integer cap, Integer iterations, Integer swaps, Integer reshuffles) {
+            Integer cap, Integer iterations, Integer tabuSize) {
 
         this.instance = instance;
         this.cap = cap;
-        instanceFitness = Fitness(instance);
+        this.tabuSize = tabuSize;
 
         // start timer
         long startTime = System.currentTimeMillis();
 
         // INITIAL SOLUTION
-        bestFit(); // Items are arranged in decreasing order of size, and then packed into bins
-                   // using first fit decreasing
+        bestFit();
+        this.bestInstance = copyInstance(this.instance);
+        this.instanceFitness = Fitness(this.instance);
 
-        // PETURBATION + LOCAL SEARCH
         for (int j = 0; j < iterations; j++) {
-            for (int i = 0; i < swaps; i++) {
-                Swap(); // Has a check within it to see if the new solution is tabu. Will not swap
-                        // if it is tabu
+            // System.out.println("Iteration: " + j);
+            // Save the current best instance
+
+            ArrayList<ArrayList<ArrayList<Integer>>> neighbourHood = new ArrayList<ArrayList<ArrayList<Integer>>>();
+
+            for(int i = 0; i < 5; i++) {
+                this.instance = copyInstance(bestInstance);
+                Integer random = (int) (Math.random() * (iterations - j) + j);
+                if (random < iterations / 2) {
+                    reshuffleRandom();
+                } else if (random > iterations * 0.75 && j % 10 == 0) {
+                    reshuffleSmallest();
+                }
+                // PETURBATION CONT.
+                Swap();
+
+                neighbourHood.add(copyInstance(this.instance));
             }
 
-            // CONSTRUCT A NEW SOLUTION
-            bestFit();
-            for (int i = 0; i < reshuffles; i++) {
-                reshuffleSmallest();
+            for (int i = 0; i < neighbourHood.size(); i++) {
+                ArrayList<ArrayList<Integer>> neighbour = neighbourHood.get(i);
+                if (!inTabuList(neighbour)) {
+                    addTabu(neighbour);
+                    Double newFitness = Fitness(neighbour);
+                    if (newFitness <= instanceFitness) {
+                        instanceFitness = newFitness;
+                        bestInstance = copyInstance(neighbour);
+                    }
+                }
             }
+
+            this.instance = bestInstance;
         }
+
+        this.instance = bestInstance;
 
         runtime = new AtomicLong((System.currentTimeMillis() - startTime));
         binCount = this.instance.size();
-
-    }
-
-    /**
-     * Uses first fit decreasing to sort the instance
-     */
-    public void greedySort() {
-
-        // Sort the items from largest to smallest
-        ArrayList<Integer> sortedItems = new ArrayList<Integer>();
-        for (ArrayList<Integer> bin : this.instance) {
-            for (Integer item : bin) {
-                sortedItems.add(item);
-            }
-        }
-        sortedItems.sort((a, b) -> b - a);
-
-        // Sort the items into bins using first fit decreasing
-        this.instance = firstFitDecreasing(sortedItems, cap);
 
     }
 
@@ -158,6 +163,7 @@ public class Tabu extends Helper {
         for (int i = 0; i < smallestBin.size(); i++) {
             bestInsert(smallestBin.get(i));
         }
+
     }
 
     /**
@@ -177,23 +183,25 @@ public class Tabu extends Helper {
         for (int i = 0; i < randomBin.size(); i++) {
             bestInsert(randomBin.get(i));
         }
+
     }
 
     /**
      * Swap two random items in the instance
      * 
-     * @param instance
      */
     public void Swap() {
-
-        // deep copy the instance
-        ArrayList<ArrayList<Integer>> previousInstance = new ArrayList<ArrayList<Integer>>();
 
         Integer index1 = (int) (Math.random() * instance.size());
         Integer index2 = (int) (Math.random() * instance.size());
 
+        int count = 0;
         while (index1 == index2) {
             index2 = (int) (Math.random() * instance.size());
+            if (count++ == 1000) {
+                printInstance(instance);
+                break;
+            }
         }
 
         ArrayList<Integer> item1 = instance.get(index1);
@@ -201,6 +209,10 @@ public class Tabu extends Helper {
 
         Integer valueIndex1 = (int) (Math.random() * item1.size());
         Integer valueIndex2 = (int) (Math.random() * item2.size());
+
+        // System.out.println("Prev Instance: " +
+        // prevInstance.get(index1).get(valueIndex1) + " " +
+        // prevInstance.get(index2).get(valueIndex2));
 
         Integer value1 = item1.get(valueIndex1);
         Integer value2 = item2.get(valueIndex2);
@@ -212,39 +224,7 @@ public class Tabu extends Helper {
             item1.set(valueIndex1, value2);
             item2.set(valueIndex2, value1);
 
-            if (inTabuList(instance)) {
-                item1.set(valueIndex1, value1);
-                item2.set(valueIndex2, value2);
-                return;
-            }
-
-            Double newFitness = Fitness(instance);
-
-            if (newFitness <= instanceFitness) {
-                instanceFitness = newFitness;
-                addTabu(instance);
-            } else {
-                item1.set(valueIndex1, value1);
-                item2.set(valueIndex2, value2);
-            }
-
         }
-
-    }
-
-    /**
-     * Returns a deep copy of the instance
-     */
-    public ArrayList<ArrayList<Integer>> copyInstance() {
-        ArrayList<ArrayList<Integer>> copy = new ArrayList<ArrayList<Integer>>();
-        for (int i = 0; i < instance.size(); i++) {
-            ArrayList<Integer> bin = new ArrayList<Integer>();
-            for (int j = 0; j < instance.get(i).size(); j++) {
-                bin.add(instance.get(i).get(j));
-            }
-            copy.add(bin);
-        }
-        return copy;
 
     }
 
@@ -271,6 +251,7 @@ public class Tabu extends Helper {
                     }
                 }
                 if (equal) {
+
                     return true;
                 }
             }
@@ -284,8 +265,8 @@ public class Tabu extends Helper {
      * @return
      */
     public void addTabu(ArrayList<ArrayList<Integer>> instance) {
-        tabuList.add(copyInstance());
-        if (tabuList.size() > TABU_SIZE) {
+        tabuList.add(instance);
+        if (tabuList.size() > tabuSize) {
             tabuList.remove(0);
         }
     }

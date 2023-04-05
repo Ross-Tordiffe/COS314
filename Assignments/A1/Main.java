@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.io.*;
 
 public class Main extends Helper {
@@ -8,18 +7,14 @@ public class Main extends Helper {
 
         String currentTime = new java.util.Date().toString();
 
-        Integer iterations = 40;
-        Integer swaps = 100;
-        Integer reshuffles = 1;
-
         long startTime = System.currentTimeMillis();
+
+        Integer ITERATION_MULTIPLIER = 1;
 
         try {
             PrintWriter writer = new PrintWriter(new FileOutputStream("results.txt", true));
             writer.println("\n\nTime of Run: " + currentTime);
             writer.println("Algorithm: Iterated Local Search");
-            writer.println(String.format("Iterations: %d, Swaps: %d, Reshuffles: %d", iterations,
-                    swaps, reshuffles));
             writer.println(
                     "Filename                 | Optimal Bin Count | Near Optimal Bin Count | Sub Optimal Bin Count | Sum of Bin Counts | Average Runtime (milliseconds)");
             writer.println(
@@ -47,18 +42,19 @@ public class Main extends Helper {
         // For ILS
         for (String filename : files.keySet()) {
             HashMap<String, ArrayList<Integer>> values = readFiles(filename);
+            HashMap<String, Integer> fileIterations = getCaps(values);
             HashMap<String, Integer> caps = getCaps(values);
 
             HashMap<String, ArrayList<ArrayList<Integer>>> instances = organiseInstances(values);
-
             long avgRuntime = 0;
 
             for (String instanceName : instances.keySet()) {
                 int opt = optima.get(instanceName.substring(0, instanceName.length() - 4));
                 ArrayList<ArrayList<Integer>> instance = instances.get(instanceName);
+                Integer iterations = fileIterations.get(instanceName);
                 Integer cap = caps.get(instanceName);
-                IteratedLocalSearch ils = new IteratedLocalSearch(instance, cap, iterations, swaps,
-                        reshuffles);
+                IteratedLocalSearch ils = new IteratedLocalSearch(instance, cap, (iterations
+                        * ITERATION_MULTIPLIER));
                 if (ils.getBinCount() == opt) {
                     files.get(filename)[0] += 1;
                 } else if (ils.getBinCount() <= opt + 1) {
@@ -102,17 +98,13 @@ public class Main extends Helper {
 
         // For Tabu Search
 
-        // set the values in files back to 0
-        for (String filename : files.keySet()) {
-            files.put(filename, new Double[] { 0.0, 0.0, 0.0, 0.0 });
-        }
-
         startTime = System.currentTimeMillis();
 
+        Integer TABU_LIST_SIZE = 100;
+
         try {
-            PrintWriter writer = new PrintWriter(new FileOutputStream("results.txt",
-                    true));
-            writer.println("\nAlgorithm: Tabu Search");
+            PrintWriter writer = new PrintWriter(new FileOutputStream("results.txt", true));
+            writer.println("Algorithm: Tabu Search");
             writer.println(
                     "Filename                 | Optimal Bin Count | Near Optimal Bin Count | Sub Optimal Bin Count | Sum of Bin Counts | Average Runtime (milliseconds)");
             writer.println(
@@ -123,7 +115,11 @@ public class Main extends Helper {
         }
 
         for (String filename : files.keySet()) {
+
+            files.put(filename, new Double[] { 0.0, 0.0, 0.0, 0.0 });
+
             HashMap<String, ArrayList<Integer>> values = readFiles(filename);
+            HashMap<String, Integer> fileIterations = getCaps(values);
             HashMap<String, Integer> caps = getCaps(values);
 
             HashMap<String, ArrayList<ArrayList<Integer>>> instances = organiseInstances(values);
@@ -132,22 +128,22 @@ public class Main extends Helper {
             for (String instanceName : instances.keySet()) {
                 int opt = optima.get(instanceName.substring(0, instanceName.length() - 4));
                 ArrayList<ArrayList<Integer>> instance = instances.get(instanceName);
+                Integer iterations = fileIterations.get(instanceName);
                 Integer cap = caps.get(instanceName);
-                Tabu tabu = new Tabu(instance, cap, iterations, swaps, reshuffles);
-                if (tabu.getBinCount() == opt) {
+                Tabu ts = new Tabu(instance, cap, (iterations * ITERATION_MULTIPLIER), TABU_LIST_SIZE);
+                if (ts.getBinCount() == opt) {
                     files.get(filename)[0] += 1;
-                } else if (tabu.getBinCount() <= opt + 1) {
+                } else if (ts.getBinCount() <= opt + 1) {
                     files.get(filename)[1] += 1;
                 }
 
                 files.get(filename)[2] += 1;
 
-                avgRuntime += tabu.getRuntime();
+                avgRuntime += ts.getRuntime();
             }
 
             System.out.println("Runtime:" + avgRuntime / files.get(filename)[2]);
             files.get(filename)[3] = (double) avgRuntime / files.get(filename)[2];
-
         }
 
         for (String filename : files.keySet()) {
@@ -176,4 +172,5 @@ public class Main extends Helper {
         }
 
     }
+
 }

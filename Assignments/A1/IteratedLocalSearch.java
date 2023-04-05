@@ -5,38 +5,56 @@ public class IteratedLocalSearch extends Helper {
 
     private ArrayList<ArrayList<Integer>> instance;
     private Integer cap;
-    private Double instanceFitness;
+    private ArrayList<ArrayList<Integer>> bestInstance;
     private Integer binCount = 0;
     private AtomicLong runtime = new AtomicLong(0);
+    private Double instanceFitness;
 
-    // Constructor
     public IteratedLocalSearch(ArrayList<ArrayList<Integer>> instance,
-            Integer cap, Integer iterations, Integer swaps, Integer reshuffles) {
+            Integer cap, Integer iterations) {
 
         this.instance = instance;
-        this.cap = cap;
 
-        instanceFitness = Fitness(instance);
+        this.cap = cap;
 
         // start timer
         long startTime = System.currentTimeMillis();
 
         // INITIAL SOLUTION
         bestFit();
+        this.bestInstance = copyInstance(instance);
+        this.instanceFitness = Fitness(instance);
 
-        // PETURBATION + LOCAL SEARCH
         for (int j = 0; j < iterations; j++) {
 
-            for (int i = 0; i < swaps; i++) {
-                Swap(); // Local Search done after each swap
-            }
+            // Save the current best instance
+            bestInstance = copyInstance(this.instance);
 
-            // CONSTRUCT A NEW SOLUTION
-            bestFit();
-            for (int i = 0; i < reshuffles; i++) {
+            // PETURBATION
+            // The more iterations, the more likely it is to use random, as the iteration
+            // count gets higher it will be more likely to use the best fit or reshuffle
+            // smallest
+            // The random numeber is generated from j to iterations.
+
+            Integer random = (int) (Math.random() * (iterations - j) + j);
+            if (random < iterations / 2) {
+                reshuffleRandom();
+            } else if (random > iterations * 0.75 && j % 4 == 0) {
                 reshuffleSmallest();
             }
+            // PETURBATION CONT.
+            Swap();
+
+            // LOCAL SEARCH / ACCEPT
+            Double newFitness = Fitness(this.instance);
+            if (newFitness <= instanceFitness) {
+                instanceFitness = newFitness;
+            } else {
+                this.instance = bestInstance;
+            }
         }
+
+        this.instance = bestInstance;
 
         runtime = new AtomicLong((System.currentTimeMillis() - startTime));
         binCount = this.instance.size();
@@ -45,6 +63,8 @@ public class IteratedLocalSearch extends Helper {
 
     /**
      * Returns the runtime of the algorithm
+     * 
+     * @return runtime
      */
     public long getRuntime() {
         return runtime.get();
@@ -52,6 +72,8 @@ public class IteratedLocalSearch extends Helper {
 
     /**
      * Returns bin count of the instance
+     * 
+     * @return binCount
      */
     public Integer getBinCount() {
         return binCount;
@@ -175,7 +197,6 @@ public class IteratedLocalSearch extends Helper {
     /**
      * Swap two random items in the instance
      * 
-     * @param instance
      */
     public void Swap() {
 
@@ -192,6 +213,10 @@ public class IteratedLocalSearch extends Helper {
         Integer valueIndex1 = (int) (Math.random() * item1.size());
         Integer valueIndex2 = (int) (Math.random() * item2.size());
 
+        // System.out.println("Prev Instance: " +
+        // prevInstance.get(index1).get(valueIndex1) + " " +
+        // prevInstance.get(index2).get(valueIndex2));
+
         Integer value1 = item1.get(valueIndex1);
         Integer value2 = item2.get(valueIndex2);
 
@@ -202,14 +227,6 @@ public class IteratedLocalSearch extends Helper {
             item1.set(valueIndex1, value2);
             item2.set(valueIndex2, value1);
 
-            Double newFitness = Fitness(instance);
-
-            if (newFitness <= instanceFitness) {
-                instanceFitness = newFitness;
-            } else { // LOCAL SEARCH
-                item1.set(valueIndex1, value1);
-                item2.set(valueIndex2, value2);
-            }
         }
 
     }
