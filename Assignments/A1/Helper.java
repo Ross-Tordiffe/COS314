@@ -154,7 +154,7 @@ public class Helper {
             ArrayList<Integer> values = fileContents.get(fileName);
             Integer cap = values.remove(0);
 
-            instances.put(fileName, firstFitDecreasing(values, cap));
+            instances.put(fileName, bestFitInitial(values, cap));
         }
 
         return instances;
@@ -226,6 +226,46 @@ public class Helper {
             } else {
                 // Add the value to the current bin
                 bins.get(bins.size() - 1).add(value);
+            }
+        }
+
+        return bins;
+
+    }
+
+    /**
+     * Sorts the values ArrayList into capped bins using Best Fit
+     * 
+     * @param values
+     * @param cap
+     * @return ArrayList<ArrayList<Integer>> bins
+     */
+    public static ArrayList<ArrayList<Integer>> bestFitInitial(ArrayList<Integer> values, Integer cap) {
+
+        ArrayList<ArrayList<Integer>> bins = new ArrayList<>();
+        // Search through the bins to find the best fit for the current value, if no bin
+        // exists create a new one
+
+        for (int i = 0; i < values.size(); i++) {
+            Integer value = values.get(i);
+            Integer bestFit = 0;
+            Integer bestFitIndex = 0;
+            // Search through the bins to find the best fit for the current value
+            for (int j = 0; j < bins.size(); j++) {
+                Integer binSum = sumBin(bins.get(j));
+                if (binSum + value <= cap && binSum > bestFit) {
+                    bestFit = binSum;
+                    bestFitIndex = j;
+                }
+            }
+            // If no bin exists, create a new one
+            if (bestFit == 0) {
+                ArrayList<Integer> bin = new ArrayList<>();
+                bin.add(value);
+                bins.add(bin);
+            } else {
+                // Add the value to the best fit bin
+                bins.get(bestFitIndex).add(value);
             }
         }
 

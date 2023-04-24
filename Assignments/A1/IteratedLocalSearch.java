@@ -8,14 +8,17 @@ public class IteratedLocalSearch extends Helper {
     private ArrayList<ArrayList<Integer>> bestInstance;
     private Integer binCount = 0;
     private AtomicLong runtime = new AtomicLong(0);
-    private Double instanceFitness;
+    private Double bestFitness;
+
+    private int startValueCount = 0;
 
     public IteratedLocalSearch(ArrayList<ArrayList<Integer>> instance,
             Integer cap, Integer iterations) {
 
         this.instance = instance;
-
         this.cap = cap;
+
+        startValueCount = SumValues();
 
         // start timer
         long startTime = System.currentTimeMillis();
@@ -23,7 +26,7 @@ public class IteratedLocalSearch extends Helper {
         // INITIAL SOLUTION
         bestFit();
         this.bestInstance = copyInstance(instance);
-        this.instanceFitness = Fitness(instance);
+        this.bestFitness = Fitness(instance);
 
         for (int j = 0; j < iterations; j++) {
 
@@ -31,11 +34,6 @@ public class IteratedLocalSearch extends Helper {
             bestInstance = copyInstance(this.instance);
 
             // PETURBATION
-            // The more iterations, the more likely it is to use random, as the iteration
-            // count gets higher it will be more likely to use the best fit or reshuffle
-            // smallest
-            // The random numeber is generated from j to iterations.
-
             Integer random = (int) (Math.random() * (iterations - j) + j);
             if (random < iterations / 2) {
                 reshuffleRandom();
@@ -45,10 +43,10 @@ public class IteratedLocalSearch extends Helper {
             // PETURBATION CONT.
             Swap();
 
-            // LOCAL SEARCH / ACCEPT
+            // // LOCAL SEARCH / ACCEPT
             Double newFitness = Fitness(this.instance);
-            if (newFitness <= instanceFitness) {
-                instanceFitness = newFitness;
+            if (newFitness <= bestFitness) {
+                bestFitness = newFitness;
             } else {
                 this.instance = bestInstance;
             }
@@ -229,6 +227,24 @@ public class IteratedLocalSearch extends Helper {
 
         }
 
+    }
+
+    public int SumValues() {
+        int sum = 0;
+        for (int i = 0; i < instance.size(); i++) {
+            for (int j = 0; j < instance.get(i).size(); j++) {
+                sum += instance.get(i).get(j);
+            }
+        }
+        return sum;
+    }
+
+    public String getStartValueCount() {
+        return startValueCount + "";
+    }
+
+    public String getEndValueCount() {
+        return SumValues() + "";
     }
 
 }

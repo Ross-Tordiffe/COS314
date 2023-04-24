@@ -10,11 +10,11 @@ public class Main extends Helper {
         long ILSTime = 0;
         long tabuTime = 0;
 
-        Integer RUNS = 1;
+        Integer RUNS = 3;
         Boolean RUN_ILS = true;
         Boolean RUN_TABU = true;
 
-        Integer ITERATION_MULTIPLIER = 5;
+        Integer ITERATION_MULTIPLIER = 10;
         Integer TABU_LIST_SIZE = 10;
         Integer NEIGHBOURHOOD_SIZE = 5;
 
@@ -128,8 +128,6 @@ public class Main extends Helper {
                 long startTime = System.currentTimeMillis();
 
                 for (String filename : tabuFiles.keySet()) {
-
-                    tabuFiles.put(filename, new Double[] { 0.0, 0.0, 0.0, 0.0 });
 
                     HashMap<String, ArrayList<Integer>> values = readFiles(filename);
                     HashMap<String, Integer> fileIterations = getCaps(values);

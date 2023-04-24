@@ -7,14 +7,15 @@ public class Tabu extends Helper {
     private ArrayList<ArrayList<Integer>> instance;
     private Integer cap;
     private Integer tabuSize;
-    private Double instanceFitness;
+    private Integer neighbourhoodSize;
+    private Double bestFitness;
     private ArrayList<ArrayList<Integer>> bestInstance;
     private Integer binCount = 0;
     private AtomicLong runtime = new AtomicLong(0);
 
     // Constructor
     public Tabu(ArrayList<ArrayList<Integer>> instance,
-            Integer cap, Integer iterations, Integer tabuSize) {
+            Integer cap, Integer iterations, Integer tabuSize, Integer neighbourhoodSize) {
 
         this.instance = instance;
         this.cap = cap;
@@ -26,7 +27,7 @@ public class Tabu extends Helper {
         // INITIAL SOLUTION
         bestFit();
         this.bestInstance = copyInstance(this.instance);
-        this.instanceFitness = Fitness(this.instance);
+        this.bestFitness = Fitness(this.instance);
 
         for (int j = 0; j < iterations; j++) {
             // System.out.println("Iteration: " + j);
@@ -34,7 +35,7 @@ public class Tabu extends Helper {
 
             ArrayList<ArrayList<ArrayList<Integer>>> neighbourHood = new ArrayList<ArrayList<ArrayList<Integer>>>();
 
-            for(int i = 0; i < 5; i++) {
+            for (int i = 0; i < neighbourhoodSize; i++) {
                 this.instance = copyInstance(bestInstance);
                 Integer random = (int) (Math.random() * (iterations - j) + j);
                 if (random < iterations / 2) {
@@ -48,19 +49,25 @@ public class Tabu extends Helper {
                 neighbourHood.add(copyInstance(this.instance));
             }
 
+            Double currentFitness = Double.MAX_VALUE;
+
             for (int i = 0; i < neighbourHood.size(); i++) {
                 ArrayList<ArrayList<Integer>> neighbour = neighbourHood.get(i);
-                if (!inTabuList(neighbour)) {
+                Boolean tabu = inTabuList(neighbour);
+                if (!tabu) {
                     addTabu(neighbour);
-                    Double newFitness = Fitness(neighbour);
-                    if (newFitness <= instanceFitness) {
-                        instanceFitness = newFitness;
-                        bestInstance = copyInstance(neighbour);
+                    Double fitness = Fitness(neighbour);
+                    if (fitness < currentFitness) {
+                        currentFitness = fitness;
+                        this.instance = neighbour;
                     }
                 }
             }
 
-            this.instance = bestInstance;
+            if (currentFitness < bestFitness) {
+                bestFitness = currentFitness;
+                bestInstance = copyInstance(this.instance);
+            }
         }
 
         this.instance = bestInstance;
