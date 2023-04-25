@@ -1,0 +1,52 @@
+
+
+========== RUNS 3 ==========
+ILS-true TABU-true
+ITERATION_MULTIPLIER:10 TABU_LIST_SIZE:10 NEIGHBOURHOOD_SIZE:5
+==============================
+
+
+========== RUNS 3 ==========
+ILS-true TABU-true
+ITERATION_MULTIPLIER:10 TABU_LIST_SIZE:10 NEIGHBOURHOOD_SIZE:5
+==============================
+
+
+========== RUNS 3 ==========
+ILS-true TABU-true
+ITERATION_MULTIPLIER:10 TABU_LIST_SIZE:10 NEIGHBOURHOOD_SIZE:5
+==============================
+
+
+========== RUNS 1 ==========
+ILS-true TABU-true
+ITERATION_MULTIPLIER:5 TABU_LIST_SIZE:10 NEIGHBOURHOOD_SIZE:5
+==============================
+
+Algorithm: Iterative Local Search
+Filename                 | Optimal Bin Count | Near Optimal Bin Count | Sub Optimal Bin Count | Sum of Bin Counts | Average Runtime (milliseconds)
+-------------------------|-------------------|------------------------|-----------------------|-------------------|-------------------------------
+Falkenauer/Falkenauer_U  | 2                 | 10                     | 68                    | 80                | 35                            
+Scholl/Scholl_2          | 355               | 49                     | 76                    | 480               | 7                             
+Falkenauer/Falkenauer_T  | 10                | 29                     | 41                    | 80                | 8                             
+Scholl/Scholl_3          | 2                 | 8                      | 0                     | 10                | 4                             
+Scholl/Scholl_1          | 359               | 75                     | 286                   | 720               | 8                             
+Schwerin/Schwerin_1      | 87                | 13                     | 0                     | 100               | 0                             
+Waescher                 | 12                | 5                      | 0                     | 17                | 2                             
+Schwerin/Schwerin_2      | 92                | 8                      | 0                     | 100               | 1                             
+Hard28                   | 0                 | 0                      | 28                    | 28                | 3                             
+Total Runtime: 14 seconds
+
+Algorithm: Tabu Search
+Filename                 | Optimal Bin Count | Near Optimal Bin Count | Sub Optimal Bin Count | Sum of Bin Counts | Average Runtime (milliseconds)
+-------------------------|-------------------|------------------------|-----------------------|-------------------|-------------------------------
+Falkenauer/Falkenauer_U  | 19                | 16                     | 45                    | 80                | 350                           
+Scholl/Scholl_2          | 418               | 39                     | 23                    | 480               | 62                            
+Falkenauer/Falkenauer_T  | 32                | 29                     | 19                    | 80                | 85                            
+Scholl/Scholl_3          | 8                 | 2                      | 0                     | 10                | 38                            
+Scholl/Scholl_1          | 514               | 65                     | 141                   | 720               | 89                            
+Schwerin/Schwerin_1      | 99                | 1                      | 0                     | 100               | 8                             
+Waescher                 | 17                | 0                      | 0                     | 17                | 15                            
+Schwerin/Schwerin_2      | 100               | 0                      | 0                     | 100               | 12                            
+Hard28                   | 1                 | 9                      | 18                    | 28                | 35                            
+Total Runtime: 133 seconds
