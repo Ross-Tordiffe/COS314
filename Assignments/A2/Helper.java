@@ -10,15 +10,18 @@ public class Helper {
      * @return a HashMap of Knapsacks
      */
     public static HashMap<String, Knapsack> readKnapsackData(String folderName) {
+
         HashMap<String, Knapsack> knapsacks = new HashMap<String, Knapsack>();
         File folder = new File(folderName);
         File[] listOfFiles = folder.listFiles();
+
         for (File file : listOfFiles) {
             if (file.isFile()) {
                 Knapsack knapsack = null;
                 try {
                     BufferedReader br = new BufferedReader(new FileReader(file));
-                    // First line has two numbers, the first is the number of items, the second is the capacity of the knapsack
+                    // First line has two numbers, the first is the number of items, the second is
+                    // the capacity of the knapsack
                     String line = br.readLine();
                     int numItems = Integer.parseInt(line.split(" ")[0]);
                     int capacity = Integer.parseInt(line.split(" ")[1]);
@@ -32,12 +35,12 @@ public class Helper {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                if(knapsack != null) {
+                if (knapsack != null) {
                     knapsacks.put(file.getName(), knapsack);
                 }
             }
         }
+
         return knapsacks;
     }
-    
 }

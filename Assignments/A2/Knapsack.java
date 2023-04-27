@@ -5,12 +5,12 @@ public class Knapsack {
     private int capacity;
     private int numItems;
     private ArrayList<Item> items;
-    
+
     public Knapsack(int capacity, int numItems) {
         this.capacity = capacity;
         items = new ArrayList<Item>();
     }
-    
+
     /**
      * @brief Get the capacity of the knapsack
      * 
@@ -19,7 +19,7 @@ public class Knapsack {
     public int getCapacity() {
         return capacity;
     }
-    
+
     /**
      * @brief Get the items in the knapsack
      * 
@@ -60,7 +60,7 @@ public class Knapsack {
             }
         }
         return totalWeight;
-        
+
     }
 
     /**
@@ -79,6 +79,19 @@ public class Knapsack {
     }
 
     /**
+     * @brief Get the total weight of the items in the knapsack
+     * @return
+     */
+    public double getTotalWeight() {
+        double totalWeight = 0;
+        for (int i = 0; i < items.size(); i++) {
+            totalWeight += items.get(i).getWeight();
+        }
+        return totalWeight;
+
+    }
+
+    /**
      * @brief Create and return a random chromosome
      * 
      */
@@ -91,6 +104,5 @@ public class Knapsack {
 
         return chromosome;
     }
-
 
 }
