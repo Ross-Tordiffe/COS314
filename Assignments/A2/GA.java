@@ -1,9 +1,7 @@
-
-import java.util.HashMap;
 import java.util.ArrayList;
 
 // Genetic Algorithm For the Knapsack Problem
-public class GA {
+public class GA extends Helper {
 
     Knapsack knapsack;
     ArrayList<Boolean[]> knapsackPopulation;
@@ -12,6 +10,7 @@ public class GA {
     double bestFitness;
     int noImprovement = 0;
     double averageFitness = 0;
+    long timeTaken = 0;
 
     ArrayList<Boolean[]> winners;
 
@@ -19,18 +18,21 @@ public class GA {
 
     // GA Parameters (constants)
     final int POPULATION_MULTIPLIER = 20;
-    final double CROSSOVER_RATE = 0.6;
+    final double CROSSOVER_RATE = 0.3;
     final double MUTATION_RATE = 0.4;
-    final int MAX_GENERATIONS = 150;
-    final int STOPPING_ITERATIONS = 75;
-    final int PENALTY_FACTOR = 15;
-    final double TOURNAMENT_PORTION = 0.3;
+    final int MAX_GENERATIONS = 500;
+    final int STOPPING_ITERATIONS = 200;
+    final int PENALTY_FACTOR = 10;
+    final double TOURNAMENT_PORTION = 0.2;
+    final double INITIAL_BIT_PROBABILITY = 0.1;
 
     // GA Parameters (variables)
     int populationSize;
     int tournamentSize;
 
     public GA(Knapsack initalKnapsack) {
+
+        long startTime = System.nanoTime();
 
         // Create the initial population
         knapsack = initalKnapsack;
@@ -48,7 +50,7 @@ public class GA {
         for (int i = 0; i < populationSize; i++) {
             Boolean[] chromosome = new Boolean[knapsack.getItems().size()];
             for (int j = 0; j < knapsack.getItems().size(); j++) {
-                chromosome[j] = Math.random() < 0.5;
+                chromosome[j] = Math.random() < INITIAL_BIT_PROBABILITY;
             }
             knapsackPopulation.add(chromosome);
         }
@@ -56,7 +58,8 @@ public class GA {
         for (int i = 0; i < MAX_GENERATIONS; i++) {
 
             if (noImprovement >= STOPPING_ITERATIONS) {
-                System.out.println("No improvement for " + STOPPING_ITERATIONS + " iterations, stopping");
+                // System.out.println("No improvement for " + STOPPING_ITERATIONS + "
+                // iterations, stopping");
                 break;
             }
 
@@ -75,8 +78,12 @@ public class GA {
 
         setBestKnapsack();
 
+        timeTaken = (System.nanoTime() - startTime) / 1000000000;
     }
 
+    /**
+     * @brief Run the GA algorithm
+     */
     public void run() {
 
         // Select two knapsacks from the population
@@ -105,11 +112,9 @@ public class GA {
      */
     public void tournamentSelection() {
 
-        // Select random knapsacks from the population to compete in the tournament run
-        // the tournament. Add the winner to the winners list and remove them and the
-        // other competitors from the population, then repeat until the population is
-        // empty
         winners = new ArrayList<Boolean[]>();
+
+        boolean o = true;
 
         while (knapsackPopulation.size() > 0 && winners.size() < populationSize) {
 
@@ -120,37 +125,22 @@ public class GA {
                 competitors.add(knapsackPopulation.get(randomIndex));
             }
 
-            // print all competitors
-            // System.out.println("Competitors: ");
-            // for (int i = 0; i < competitors.size(); i++) {
-            // printChromosome(competitors.get(i));
-            // }
-            // System.out.println("Population: ");
-            // for (int i = 0; i < knapsackPopulation.size(); i++) {
-            // printChromosome(knapsackPopulation.get(i));
-            // }
-
-            // Run the tournament
             Boolean[] winner = new Boolean[knapsack.getItems().size()];
-            double winnerFitness = 0;
+            double winnerFitness = -1 * Double.MAX_VALUE;
+
             for (int i = 0; i < competitors.size(); i++) {
-                double competitorFitness = getPenaltyFitness(competitors.get(i));
+                double competitorFitness = getSumFitness(competitors.get(i));
                 if (competitorFitness > winnerFitness) {
                     winner = competitors.get(i);
                     winnerFitness = competitorFitness;
                 }
             }
 
-            // Add the winner to the winners list and remove them and the other competitors
-            // from the population
             winners.add(winner);
-            for (int i = 0; i < competitors.size(); i++) {
-                if (competitors.get(i) != winner) {
-                    knapsackPopulation.add(competitors.get(i));
-                }
-            }
-
         }
+
+        // Clear out the old population
+        knapsackPopulation = new ArrayList<Boolean[]>();
 
     }
 
@@ -158,9 +148,6 @@ public class GA {
      * @brief Performs one point crossover on two knapsacks
      */
     public void onePointCrossover() {
-
-        // For each pair of knapsacks in the winners list, determine if crossover will
-        // occur. If it will, determine the crossover point and perform crossover
 
         nextGenerationPopulation = new ArrayList<Boolean[]>();
 
@@ -217,7 +204,6 @@ public class GA {
 
                 // Determine the mutation point
                 int mutationPoint = (int) (Math.random() * knapsack.getItems().size());
-
                 // Perform mutation
                 chromosome[mutationPoint] = !chromosome[mutationPoint];
 
@@ -367,23 +353,38 @@ public class GA {
     }
 
     /**
-     * @brief print a chromosome
+     * @brief get the time
+     * 
+     */
+    public double getTimeElapsed() {
+        return timeTaken;
+    }
+
+    /**
+     * @brief create a deep copy of a chromosome
      * 
      * @param chromosome
      */
-    public void printChromosome(Boolean[] chromosome) {
-        System.out.print("[");
+    public Boolean[] copyChromosome(Boolean[] chromosome) {
+        Boolean[] copy = new Boolean[chromosome.length];
         for (int i = 0; i < chromosome.length; i++) {
-            if (chromosome[i]) {
-                System.out.print("1");
-            } else {
-                System.out.print("0");
-            }
-            if (i != chromosome.length - 1) {
-                System.out.print(", ");
-            }
+            copy[i] = chromosome[i];
         }
-        System.out.println("]");
+        return copy;
+    }
+
+    /**
+     * @brief print out the parameters
+     */
+    public void printParameters() {
+        System.out.println("Population Multiplier: " + POPULATION_MULTIPLIER);
+        System.out.println("Crossover Rate: " + CROSSOVER_RATE);
+        System.out.println("Mutation Rate: " + MUTATION_RATE);
+        System.out.println("Max Generations: " + MAX_GENERATIONS);
+        System.out.println("Stopping Iterations: " + STOPPING_ITERATIONS);
+        System.out.println("Penalty Factor: " + PENALTY_FACTOR);
+        System.out.println("Tournament Portion: " + TOURNAMENT_PORTION);
+        System.out.println("Initial Bit Probability: " + INITIAL_BIT_PROBABILITY);
     }
 
 }

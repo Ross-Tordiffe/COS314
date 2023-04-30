@@ -43,4 +43,26 @@ public class Helper {
 
         return knapsacks;
     }
+
+    /**
+     * @brief print a solution
+     * 
+     * @param solution
+     */
+    public void printSolution(Boolean[] solution) {
+        System.out.print("[");
+        for (int i = 0; i < solution.length; i++) {
+            if (solution[i] == null) {
+                System.out.print("_");
+            } else if (solution[i]) {
+                System.out.print("1");
+            } else {
+                System.out.print("0");
+            }
+            if (i != solution.length - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
+    }
 }

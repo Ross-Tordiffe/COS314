@@ -48,14 +48,14 @@ public class Knapsack {
     }
 
     /**
-     * @brief Get the total weight of the knapsack given a chromosome (solution)s
+     * @brief Get the total weight of the knapsack given a solution
      * 
      * @return totalWeight
      */
-    public double getWeight(Boolean[] chromosome) {
+    public double getWeight(Boolean[] solution) {
         double totalWeight = 0;
         for (int i = 0; i < items.size(); i++) {
-            if (chromosome[i]) {
+            if (solution[i]) {
                 totalWeight += items.get(i).getWeight();
             }
         }
@@ -64,14 +64,14 @@ public class Knapsack {
     }
 
     /**
-     * @brief Get the total value of the knapsack given a chromosome (solution)
+     * @brief Get the total value of the knapsack given a solution
      * 
      * @return totalValue
      */
-    public double getValue(Boolean[] chromosome) {
+    public double getValue(Boolean[] solution) {
         double totalValue = 0;
         for (int i = 0; i < items.size(); i++) {
-            if (chromosome[i]) {
+            if (solution[i]) {
                 totalValue += items.get(i).getValue();
             }
         }
@@ -90,19 +90,4 @@ public class Knapsack {
         return totalWeight;
 
     }
-
-    /**
-     * @brief Create and return a random chromosome
-     * 
-     */
-    public Boolean[] generateRandomChromosome() {
-        Boolean[] chromosome = new Boolean[items.size()];
-
-        for (int i = 0; i < chromosome.length; i++) {
-            chromosome[i] = Math.random() < 0.5;
-        }
-
-        return chromosome;
-    }
-
 }
