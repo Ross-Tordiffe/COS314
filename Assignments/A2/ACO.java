@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 public class ACO extends Helper {
 
     Knapsack knapsack;
@@ -47,14 +49,14 @@ public class ACO extends Helper {
 
         // Add random items to an inital solution until it is full capacity
         ArrayList<Integer> itemList = new ArrayList<Integer>();
-        for (int i = 0; i < itemList.length; i++) {
-            itemList[i] = i;
+        for (int i = 0; i < itemList.size(); i++) {
+            itemList.add(i);
         }
 
         Boolean[] initalSolution = new Boolean[knapsack.getItems().size()];
 
         while (knapsack.getWeight(initalSolution) < knapsack.getCapacity()) {
-            int randomItem = (int) (Math.random() * itemList.length);
+            int randomItem = (int) (Math.random() * itemList.size());
             initalSolution[randomItem] = true;
             itemList.remove(randomItem);
         }
