@@ -3,7 +3,6 @@ import java.util.ArrayList;
 public class Knapsack {
 
     private int capacity;
-    private int numItems;
     private ArrayList<Item> items;
 
     public Knapsack(int capacity, int numItems) {

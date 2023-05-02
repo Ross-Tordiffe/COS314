@@ -17,29 +17,20 @@ public class ACO extends Helper {
     boolean once = false;
 
     // ACO parameters (constants)
-    final int MAX_ITERATIONS = 5000;
-    final int STOPPING_ITERATIONS = 500;
-    final double ALPHA_MAX = 0.5;
-    final double BETA_REDUCTION_RATE = 0.2;
-    final double EVAPORATION_RATE = 0.05;
-    final int PENALTY_FACTOR = 5;
-    final double INITIAL_PHEROMONE = 0.6;
-    final double UPDATE_STRENGTH = 0.1;
+    final int MAX_ITERATIONS = 150;
+    final int STOPPING_ITERATIONS = 50;
+    final double ALPHA = 0.1;
+    final double BETA = 3.0;
+    final double EVAPORATION_RATE = 0.3;
+    final double INITIAL_PHEROMONE = 0.1;
+    final double UPDATE_STRENGTH = 0.25;
     final int LS_METHOD = 1; // 0 = none, 1 = Replace the worst item, 2 = Assess all single item flips and
                              // choose the best
 
     // ACO parameters (variables)
     int numAnts;
     double pheromone[];
-    double beta = 3.0;
-    double alpha = 0.1;
-    double explorationProbability = 0.2;
     double Q;
-
-    // ACO inital values for printing
-    double initalBeta = beta;
-    double initalAlpha = alpha;
-    double initalExplorationProbability = explorationProbability;
 
     public ACO(Knapsack initalKnapsack, Random seededRandom) {
 
@@ -48,7 +39,7 @@ public class ACO extends Helper {
         double previousBestFitness;
 
         knapsack = initalKnapsack;
-        numAnts = knapsack.getItems().size();
+        numAnts = knapsack.getItems().size() / 2;
         Q = knapsack.getCapacity() * UPDATE_STRENGTH;
 
         // Initialize the pheromone matrix
@@ -100,9 +91,6 @@ public class ACO extends Helper {
 
         localSearch();
 
-        beta -= BETA_REDUCTION_RATE * (beta / MAX_ITERATIONS);
-        alpha += (ALPHA_MAX / MAX_ITERATIONS);
-        explorationProbability += (explorationProbability / MAX_ITERATIONS);
     }
 
     /**
@@ -125,16 +113,6 @@ public class ACO extends Helper {
                 // Sum of probabilities
                 double sum = 0;
 
-                if (seededRandom.nextDouble() < explorationProbability) {
-                    int random = (int) (seededRandom.nextDouble() * knapsack.getItems().size());
-                    if (!solution[random]
-                            && weight + knapsack.getItems().get(random).getWeight() <= knapsack.getCapacity()) {
-                        solution[random] = true;
-                        weight += knapsack.getItems().get(random).getWeight();
-                    }
-                    continue;
-                }
-
                 // Calculate the probability of selecting each item
                 for (int i = 0; i < knapsack.getItems().size(); i++) {
                     if (!solution[i] && weight + knapsack.getItems().get(i).getWeight() <= knapsack.getCapacity()) {
@@ -145,7 +123,7 @@ public class ACO extends Helper {
                     }
                 }
 
-                // get a random number between 0 and sum
+                // Generate a random number between 0 and sum
                 double random = seededRandom.nextDouble() * sum;
                 double cumulativeProbability = 0;
                 int selected = -1;
@@ -186,7 +164,7 @@ public class ACO extends Helper {
     private double decisionRule(int item) {
         // Possibly change how the heuristic is defined
         double heuristic = knapsack.getItems().get(item).getValue() / knapsack.getItems().get(item).getWeight();
-        return Math.pow(pheromone[item], alpha) * Math.pow(heuristic, beta);
+        return Math.pow(pheromone[item], ALPHA) * Math.pow(heuristic, BETA);
     }
 
     /**
@@ -196,7 +174,7 @@ public class ACO extends Helper {
 
         for (int ant = 0; ant < numAnts; ant++) {
 
-            double fitness = getPenaltyFitness(ants.get(ant));
+            double fitness = getSumFitness(ants.get(ant));
 
             double sumPheromone = 0;
             for (int j = 0; j < knapsack.getItems().size(); j++) {
@@ -216,6 +194,9 @@ public class ACO extends Helper {
 
         for (int i = 0; i < knapsack.getItems().size(); i++) {
             pheromone[i] = (1 - EVAPORATION_RATE) * pheromone[i];
+            if (pheromone[i] > 1) {
+                pheromone[i] = 1;
+            }
         }
     }
 
@@ -231,7 +212,6 @@ public class ACO extends Helper {
         }
 
         findBestSolution();
-
     }
 
     /**
@@ -241,7 +221,7 @@ public class ACO extends Helper {
 
         for (int i = 0; i < numAnts; i++) {
 
-            double oldFitness = getPenaltyFitness(ants.get(i));
+            double oldFitness = getSumFitness(ants.get(i));
 
             // Find the best item to remove (the one with the lowest value to weight ratio)
             int remove = -1;
@@ -274,7 +254,7 @@ public class ACO extends Helper {
             ants.get(i)[remove] = false;
             ants.get(i)[add] = true;
 
-            double newFitness = getPenaltyFitness(ants.get(i));
+            double newFitness = getSumFitness(ants.get(i));
 
             // If the new solution is worse, revert back to the old solution
             if (newFitness < oldFitness) {
@@ -292,7 +272,7 @@ public class ACO extends Helper {
 
         for (int i = 0; i < numAnts; i++) {
 
-            double oldFitness = getPenaltyFitness(ants.get(i));
+            double oldFitness = getSumFitness(ants.get(i));
             double newFitness = 0;
             int fitnessIndex = -1;
 
@@ -303,7 +283,7 @@ public class ACO extends Helper {
                     solutions[j][k] = ants.get(i)[k];
                 }
                 solutions[j][j] = !solutions[j][j];
-                newFitness = getPenaltyFitness(solutions[j]);
+                newFitness = getSumFitness(solutions[j]);
                 if (newFitness > oldFitness) {
                     fitnessIndex = j;
                     oldFitness = newFitness;
@@ -313,33 +293,10 @@ public class ACO extends Helper {
             if (fitnessIndex != -1) {
                 ants.set(i, solutions[fitnessIndex]);
             }
-
         }
     }
 
     // === Helper functions ===
-
-    /**
-     * @brief Determines the fitness of a knapsack using a penalty if the weight
-     *        exceeds the capacity
-     * 
-     * @param solution
-     * @return fitness
-     */
-    public double getPenaltyFitness(Boolean[] solution) {
-        double totalValue = knapsack.getValue(solution);
-        double totalWeight = knapsack.getWeight(solution);
-
-        if (totalWeight > knapsack.getCapacity()) {
-            double excessWeight = totalWeight - knapsack.getCapacity();
-            double penalty = excessWeight * PENALTY_FACTOR;
-            return totalValue - penalty;
-        } else {
-            return totalValue;
-        }
-
-    }
-
     /**
      * @brief Determines the fitness of a knapsack using the sum of the values of
      *        the knapsack
@@ -355,23 +312,6 @@ public class ACO extends Helper {
         }
 
         return fitness;
-    }
-
-    /**
-     * @brief print out the pheromone matrix
-     */
-    private void printPheromones() {
-        // print to 2 decimal places
-        for (int j = 0; j < pheromone.length; j++) {
-            if (pheromone[j] <= 0.25) {
-                System.out.print("\033[31m" + String.format("%.2f", pheromone[j]) + "\033[0m ");
-            } else if (pheromone[j] <= 0.60) {
-                System.out.print("\033[33m" + String.format("%.2f", pheromone[j]) + "\033[0m ");
-            } else {
-                System.out.print("\033[32m" + String.format("%.2f", pheromone[j]) + "\033[0m ");
-            }
-        }
-        System.out.println();
     }
 
     /**
@@ -400,10 +340,9 @@ public class ACO extends Helper {
         System.out.println("\n=== ACO Parameters ===");
         System.out.println("| Max Iterations:          " + MAX_ITERATIONS);
         System.out.println("| Stopping Criteria:       " + STOPPING_ITERATIONS);
-        System.out.println("| Alpha Max:               " + ALPHA_MAX);
-        System.out.println("| Beta Reduction Rate:     " + BETA_REDUCTION_RATE);
+        System.out.println("| Alpha Max:               " + ALPHA);
+        System.out.println("| Beta Reduction Rate:     " + BETA);
         System.out.println("| Evaporation Rate:        " + EVAPORATION_RATE);
-        System.out.println("| Penalty Factor:          " + PENALTY_FACTOR);
         System.out.println("| Inital Pheromone:        " + INITIAL_PHEROMONE);
         System.out.println("| Update Strength:         " + UPDATE_STRENGTH);
         System.out.println("| Number of Ants:          " + numAnts);
@@ -415,9 +354,6 @@ public class ACO extends Helper {
         } else if (LS_METHOD == 2) {
             System.out.println("Best flip");
         }
-        System.out.println("| Inital Beta:             " + initalBeta);
-        System.out.println("| Inital Alpha:            " + initalAlpha);
-        System.out.println("| Exploration Probability: " + initalExplorationProbability);
         System.out.println("| Q:                       " + Q);
         System.out.println("=== === ===");
     }

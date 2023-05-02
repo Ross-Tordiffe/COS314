@@ -5,9 +5,9 @@ import java.util.Random;
 public class Main extends Helper {
     public static void main(String[] args) {
 
-        int RUN_COUNT = 1;
+        int RUN_COUNT = 10;
 
-        boolean runGA = false;
+        boolean runGA = true;
         boolean runASO = true;
 
         HashMap<String, Double> optimums = new HashMap<String, Double>();
@@ -24,7 +24,6 @@ public class Main extends Helper {
         optimums.put("knapPI_1_100_1000_1", 9147.0);
 
         HashMap<String, Knapsack> knapsacks = new HashMap<String, Knapsack>();
-        // Folder is called "Knapsack Instances watch out for the space"
         knapsacks = readKnapsackData("Knapsack Instances");
 
         boolean first = true;
@@ -34,10 +33,6 @@ public class Main extends Helper {
             for (String key : knapsacks.keySet()) {
 
                 Knapsack knapsack = knapsacks.get(key);
-
-                if (key.equals("knapPI_1_100_1000_1")) {
-                    continue;
-                }
 
                 int averageIterations = 0;
                 int hits = 0;
@@ -75,7 +70,7 @@ public class Main extends Helper {
                     averageOutBy /= (RUN_COUNT - hits);
                 }
 
-                if (hits >= Math.floor(RUN_COUNT / 2)) {
+                if (hits >= Math.floor(RUN_COUNT / 2) && hits != 0) {
                     System.out.print("\033[32mMajority Optimal:\033[0m Avg Time: ");
                     System.out.printf("%.2f", averageTime);
                     System.out.println(" seconds");
@@ -154,21 +149,7 @@ public class Main extends Helper {
                         + averageIterations + " | Found Optimal: " + hits + "/" +
                         RUN_COUNT
                         + " | Average Out By: " + averageOutBy);
-
-                // output the seed that was used
-
             }
         }
     }
 }
-
-// if (ga.getBestFitness() == optimums.get(key)) {
-// System.out.println("\033[32moptimal:\033[0m " + key + " Found on iter: " +
-// ga.getBestIteration());
-// } else {
-// System.out.println("\033[31mnot optimal:\033[0m " + key + " O(" +
-// optimums.get(key) + ")" + " F("
-// + ga.getBestFitness() + ") | out by \033[31m"
-// + (-1 * (ga.getBestFitness() - optimums.get(key)))
-// + "\033[0m " + " Found on iter: " + ga.getBestIteration());
-// }

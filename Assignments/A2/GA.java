@@ -17,11 +17,11 @@ public class GA extends Helper {
     int bestIteration = 0;
 
     // GA Parameters (constants)
-    final int POPULATION_MULTIPLIER = 20;
+    final int POPULATION_MULTIPLIER = 8;
     final double CROSSOVER_RATE = 0.3;
     final double MUTATION_RATE = 0.4;
     final int MAX_GENERATIONS = 500;
-    final int STOPPING_ITERATIONS = 200;
+    final int STOPPING_ITERATIONS = 250;
     final int PENALTY_FACTOR = 10;
     final double TOURNAMENT_PORTION = 0.2;
     final double INITIAL_BIT_PROBABILITY = 0.1;
@@ -111,8 +111,6 @@ public class GA extends Helper {
     public void tournamentSelection() {
 
         winners = new ArrayList<Boolean[]>();
-
-        boolean o = true;
 
         while (knapsackPopulation.size() > 0 && winners.size() < populationSize) {
 
@@ -206,9 +204,7 @@ public class GA extends Helper {
                 chromosome[mutationPoint] = !chromosome[mutationPoint];
 
             }
-
         }
-
     }
 
     /**
