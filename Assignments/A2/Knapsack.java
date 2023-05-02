@@ -88,6 +88,17 @@ public class Knapsack {
             totalWeight += items.get(i).getWeight();
         }
         return totalWeight;
+    }
 
+    /**
+     * @brief Get the total value of the items in the knapsack
+     * @return
+     */
+    public double getTotalValue() {
+        double totalValue = 0;
+        for (int i = 0; i < items.size(); i++) {
+            totalValue += items.get(i).getValue();
+        }
+        return totalValue;
     }
 }

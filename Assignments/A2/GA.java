@@ -58,8 +58,6 @@ public class GA extends Helper {
         for (int i = 0; i < MAX_GENERATIONS; i++) {
 
             if (noImprovement >= STOPPING_ITERATIONS) {
-                // System.out.println("No improvement for " + STOPPING_ITERATIONS + "
-                // iterations, stopping");
                 break;
             }
 
@@ -377,14 +375,16 @@ public class GA extends Helper {
      * @brief print out the parameters
      */
     public void printParameters() {
-        System.out.println("Population Multiplier: " + POPULATION_MULTIPLIER);
-        System.out.println("Crossover Rate: " + CROSSOVER_RATE);
-        System.out.println("Mutation Rate: " + MUTATION_RATE);
-        System.out.println("Max Generations: " + MAX_GENERATIONS);
-        System.out.println("Stopping Iterations: " + STOPPING_ITERATIONS);
-        System.out.println("Penalty Factor: " + PENALTY_FACTOR);
-        System.out.println("Tournament Portion: " + TOURNAMENT_PORTION);
-        System.out.println("Initial Bit Probability: " + INITIAL_BIT_PROBABILITY);
+        System.out.println("\n=== GA Parameters ===");
+        System.out.println("| Population Multiplier:   " + POPULATION_MULTIPLIER);
+        System.out.println("| Crossover Rate:          " + CROSSOVER_RATE);
+        System.out.println("| Mutation Rate:           " + MUTATION_RATE);
+        System.out.println("| Max Generations:         " + MAX_GENERATIONS);
+        System.out.println("| Stopping Iterations:     " + STOPPING_ITERATIONS);
+        System.out.println("| Penalty Factor:          " + PENALTY_FACTOR);
+        System.out.println("| Tournament Portion:      " + TOURNAMENT_PORTION);
+        System.out.println("| Initial Bit Probability: " + INITIAL_BIT_PROBABILITY);
+        System.out.println("=== === ===");
     }
 
 }

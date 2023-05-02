@@ -55,9 +55,9 @@ public class Helper {
             if (solution[i] == null) {
                 System.out.print("_");
             } else if (solution[i]) {
-                System.out.print("1");
+                System.out.print(" 1 ");
             } else {
-                System.out.print("0");
+                System.out.print(" 0 ");
             }
             if (i != solution.length - 1) {
                 System.out.print(", ");
@@ -65,4 +65,5 @@ public class Helper {
         }
         System.out.println("]");
     }
+
 }

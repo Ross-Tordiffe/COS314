@@ -1,10 +1,11 @@
 
 import java.util.HashMap;
+import java.util.Random;
 
 public class Main extends Helper {
     public static void main(String[] args) {
 
-        int RUN_COUNT = 10;
+        int RUN_COUNT = 1;
 
         boolean runGA = false;
         boolean runASO = true;
@@ -34,10 +35,15 @@ public class Main extends Helper {
 
                 Knapsack knapsack = knapsacks.get(key);
 
+                if (key.equals("knapPI_1_100_1000_1")) {
+                    continue;
+                }
+
                 int averageIterations = 0;
                 int hits = 0;
                 int averageOutBy = 0;
-                int averageTime = 0;
+                double averageTime = 0;
+                double bestFitness = 0;
 
                 for (int i = 0; i < RUN_COUNT; i++) {
                     GA ga = new GA(knapsack);
@@ -48,12 +54,17 @@ public class Main extends Helper {
                     }
 
                     averageIterations += ga.getBestIteration();
+
                     if (ga.getBestFitness() == optimums.get(key)) {
                         hits++;
                     } else {
                         averageOutBy += (-1 * (ga.getBestFitness() - optimums.get(key)));
                     }
                     averageTime += ga.getTimeElapsed();
+
+                    if (ga.getBestFitness() > bestFitness) {
+                        bestFitness = ga.getBestFitness();
+                    }
 
                 }
 
@@ -65,9 +76,13 @@ public class Main extends Helper {
                 }
 
                 if (hits >= Math.floor(RUN_COUNT / 2)) {
-                    System.out.println("\033[32mMajority Optimal:\033[0m Avg Time:" + averageTime);
+                    System.out.print("\033[32mMajority Optimal:\033[0m Avg Time: ");
+                    System.out.printf("%.2f", averageTime);
+                    System.out.println(" seconds");
                 } else {
-                    System.out.println("\033[31mMajority Not Optimal:\033[0m Avg Time:" + averageTime);
+                    System.out.print("\033[31mMajority Not Optimal:\033[0m Avg Time: ");
+                    System.out.printf("%.2f", averageTime);
+                    System.out.println(" seconds | Best: " + bestFitness);
                 }
 
                 System.out.println(key + " - Optimal: " + optimums.get(key) + " | Average Iterations: "
@@ -79,57 +94,68 @@ public class Main extends Helper {
 
         // run through ACO for each knapsack
         if (runASO) {
-            for (String key : knapsacks.keySet()) {
 
-                if (!key.equals("f4_l-d_kp_4_11")) {
-                    continue;
-                }
+            first = true;
+
+            for (String key : knapsacks.keySet()) {
 
                 Knapsack knapsack = knapsacks.get(key);
 
-                // int averageIterations = 0;
-                // int hits = 0;
-                // int averageOutBy = 0;
-                // int averageTime = 0;
+                int averageIterations = 0;
+                int hits = 0;
+                int averageOutBy = 0;
+                double averageTime = 0;
+                double bestFitness = 0;
+
+                double seed = System.currentTimeMillis();
+                Random random = new Random((long) seed);
 
                 for (int i = 0; i < RUN_COUNT; i++) {
-                    ACO aco = new ACO(knapsack);
+                    ACO aco = new ACO(knapsack, random);
 
-                    // if (first) {
-                    // first = false;
-                    // aco.printParameters();
-                    // }
+                    if (first) {
+                        first = false;
+                        aco.printParameters();
+                    }
 
-                    // averageIterations += aco.getBestIteration();
-                    // if (aco.getBestFitness() == optimums.get(key)) {
-                    // hits++;
-                    // } else {
-                    // averageOutBy += (-1 * (aco.getBestFitness() - optimums.get(key)));
-                    // }
-                    // averageTime += aco.getTimeElapsed();
+                    averageIterations += aco.getBestIteration();
+                    if (aco.getBestFitness() == optimums.get(key)) {
+                        hits++;
+                    } else {
+                        averageOutBy += (-1 * (aco.getBestFitness() - optimums.get(key)));
+                    }
+
+                    if (bestFitness < aco.getBestFitness()) {
+                        bestFitness = aco.getBestFitness();
+                    }
+
+                    averageTime += aco.getTimeElapsed();
 
                 }
 
-                // averageIterations /= RUN_COUNT;
-                // averageTime /= RUN_COUNT;
+                averageIterations /= RUN_COUNT;
+                averageTime /= RUN_COUNT;
 
-                // if (hits < RUN_COUNT) {
-                // averageOutBy /= (RUN_COUNT - hits);
-                // }
+                if (hits < RUN_COUNT) {
+                    averageOutBy /= (RUN_COUNT - hits);
+                }
+                if (hits >= Math.floor(RUN_COUNT / 2) && hits != 0) {
+                    System.out.print("\033[32mMajority Optimal:\033[0m Avg Time: ");
+                    System.out.printf("%.2f", averageTime);
+                    System.out.println(" seconds");
 
-                // if (hits >= Math.floor(RUN_COUNT / 2)) {
-                // System.out.println("\033[32mMajority Optimal:\033[0m Avg Time:" +
-                // averageTime);
-                // } else {
-                // System.out.println("\033[31mMajority Not Optimal:\033[0m Avg Time:" +
-                // averageTime);
-                // }
+                } else {
+                    System.out.print("\033[31mMajority Not Optimal:\033[0m Avg Time: ");
+                    System.out.printf("%.2f", averageTime);
+                    System.out.println(" seconds | Best: " + bestFitness);
+                }
 
-                // System.out.println(key + " - Optimal: " + optimums.get(key) + " | Average
-                // Iterations: "
-                // + (averageIterations / RUN_COUNT) + " | Found Optimal: " + hits + "/" +
-                // RUN_COUNT
-                // + " | Average Out By: " + averageOutBy);
+                System.out.println(key + " - Optimal: " + optimums.get(key) + " | Average Iterations: "
+                        + averageIterations + " | Found Optimal: " + hits + "/" +
+                        RUN_COUNT
+                        + " | Average Out By: " + averageOutBy);
+
+                // output the seed that was used
 
             }
         }
