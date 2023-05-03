@@ -5,7 +5,7 @@ import java.util.Random;
 public class Main extends Helper {
     public static void main(String[] args) {
 
-        int RUN_COUNT = 10;
+        int RUN_COUNT = 1;
 
         boolean runGA = true;
         boolean runASO = true;
@@ -72,16 +72,16 @@ public class Main extends Helper {
 
                 if (hits >= Math.floor(RUN_COUNT / 2) && hits != 0) {
                     System.out.print("\033[32mMajority Optimal:\033[0m Avg Time: ");
-                    System.out.printf("%.2f", averageTime);
+                    System.out.printf("%.3f", averageTime);
                     System.out.println(" seconds");
                 } else {
                     System.out.print("\033[31mMajority Not Optimal:\033[0m Avg Time: ");
-                    System.out.printf("%.2f", averageTime);
+                    System.out.printf("%.3f", averageTime);
                     System.out.println(" seconds | Best: " + bestFitness);
                 }
 
                 System.out.println(key + " - Optimal: " + optimums.get(key) + " | Average Iterations: "
-                        + (averageIterations / RUN_COUNT) + " | Found Optimal: " + hits + "/" + RUN_COUNT
+                        + (averageIterations) + " | Found Optimal: " + hits + "/" + RUN_COUNT
                         + " | Average Out By: " + averageOutBy);
 
             }
@@ -136,12 +136,12 @@ public class Main extends Helper {
                 }
                 if (hits >= Math.floor(RUN_COUNT / 2) && hits != 0) {
                     System.out.print("\033[32mMajority Optimal:\033[0m Avg Time: ");
-                    System.out.printf("%.2f", averageTime);
+                    System.out.printf("%.3f", averageTime);
                     System.out.println(" seconds");
 
                 } else {
                     System.out.print("\033[31mMajority Not Optimal:\033[0m Avg Time: ");
-                    System.out.printf("%.2f", averageTime);
+                    System.out.printf("%.3f", averageTime);
                     System.out.println(" seconds | Best: " + bestFitness);
                 }
 

@@ -63,15 +63,6 @@ public class GA extends Helper {
 
             run();
 
-            double currentAverageFitness = getAverageFitness();
-            if (currentAverageFitness > averageFitness) {
-                averageFitness = currentAverageFitness;
-                bestIteration += noImprovement;
-                noImprovement = 0;
-            } else {
-                noImprovement++;
-            }
-
         }
 
         setBestKnapsack();
@@ -98,7 +89,7 @@ public class GA extends Helper {
 
         // Fill the rest of the new population with random knapsacks
         // System.out.println("Random Phase");
-        fillPopulation();
+        replacePopulation();
 
         // Replace the old population with the new population
         knapsackPopulation = nextGenerationPopulation;
@@ -134,9 +125,6 @@ public class GA extends Helper {
 
             winners.add(winner);
         }
-
-        // Clear out the old population
-        knapsackPopulation = new ArrayList<Boolean[]>();
 
     }
 
@@ -208,22 +196,34 @@ public class GA extends Helper {
     }
 
     /**
-     * @brief fills the rest of the new population with random knapsacks
+     * @brief Replaces the old population with the new population, or keeps the old
+     *        population if the new population is worse.
      */
-    public void fillPopulation() {
+    public void replacePopulation() {
 
-        while (nextGenerationPopulation.size() < populationSize) {
+        double currentAverageFitness = getAverageFitness();
 
-            Boolean[] chromosome = new Boolean[knapsack.getItems().size()];
-            for (int j = 0; j < knapsack.getItems().size(); j++) {
-                chromosome[j] = Math.random() < 0.5;
+        if (currentAverageFitness > averageFitness) {
+            averageFitness = currentAverageFitness;
+            bestIteration += noImprovement;
+            noImprovement = 0;
+            // Clear out the old population
+            knapsackPopulation = new ArrayList<Boolean[]>();
+        } else {
+            noImprovement++;
+
+            while (nextGenerationPopulation.size() < populationSize) {
+
+                Boolean[] chromosome = new Boolean[knapsack.getItems().size()];
+                for (int j = 0; j < knapsack.getItems().size(); j++) {
+                    chromosome[j] = Math.random() < 0.5;
+                }
+                nextGenerationPopulation.add(chromosome);
+
             }
-            nextGenerationPopulation.add(chromosome);
 
+            knapsackPopulation = nextGenerationPopulation;
         }
-
-        knapsackPopulation = nextGenerationPopulation;
-
     }
 
     // === Helper Functions ===

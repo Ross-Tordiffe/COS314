@@ -17,14 +17,14 @@ public class ACO extends Helper {
     boolean once = false;
 
     // ACO parameters (constants)
-    final int MAX_ITERATIONS = 150;
-    final int STOPPING_ITERATIONS = 50;
-    final double ALPHA = 0.1;
-    final double BETA = 3.0;
-    final double EVAPORATION_RATE = 0.3;
-    final double INITIAL_PHEROMONE = 0.1;
-    final double UPDATE_STRENGTH = 0.25;
-    final int LS_METHOD = 1; // 0 = none, 1 = Replace the worst item, 2 = Assess all single item flips and
+    final int MAX_ITERATIONS = 200;
+    final int STOPPING_ITERATIONS = 100;
+    final double ALPHA = 0.5;
+    final double BETA = 2;
+    final double EVAPORATION_RATE = 0.95;
+    final double INITIAL_PHEROMONE = 0.5;
+    final double UPDATE_STRENGTH = 0.5;
+    final int LS_METHOD = 0; // 0 = none, 1 = Replace the worst item, 2 = Assess all single item flips and
                              // choose the best
 
     // ACO parameters (variables)
@@ -39,7 +39,7 @@ public class ACO extends Helper {
         double previousBestFitness;
 
         knapsack = initalKnapsack;
-        numAnts = knapsack.getItems().size() / 2;
+        numAnts = knapsack.getItems().size();
         Q = knapsack.getCapacity() * UPDATE_STRENGTH;
 
         // Initialize the pheromone matrix
@@ -186,8 +186,7 @@ public class ACO extends Helper {
             // Update the pheromone matrix
             for (int j = 0; j < knapsack.getItems().size(); j++) {
                 if (ants.get(ant)[j]) {
-                    pheromone[j] = pheromone[j]
-                            + (Q / fitness) * (pheromone[j] / sumPheromone);
+                    pheromone[j] = pheromone[j] + (Q / fitness) * (pheromone[j] / sumPheromone);
                 }
             }
         }
@@ -212,6 +211,7 @@ public class ACO extends Helper {
         }
 
         findBestSolution();
+
     }
 
     /**
@@ -293,10 +293,12 @@ public class ACO extends Helper {
             if (fitnessIndex != -1) {
                 ants.set(i, solutions[fitnessIndex]);
             }
+
         }
     }
 
     // === Helper functions ===
+
     /**
      * @brief Determines the fitness of a knapsack using the sum of the values of
      *        the knapsack
@@ -312,6 +314,23 @@ public class ACO extends Helper {
         }
 
         return fitness;
+    }
+
+    /**
+     * @brief print out the pheromone matrix
+     */
+    private void printPheromones() {
+        // print to 2 decimal places
+        for (int j = 0; j < pheromone.length; j++) {
+            if (pheromone[j] <= 0.25) {
+                System.out.print("\033[31m" + String.format("%.2f", pheromone[j]) + "\033[0m ");
+            } else if (pheromone[j] <= 0.60) {
+                System.out.print("\033[33m" + String.format("%.2f", pheromone[j]) + "\033[0m ");
+            } else {
+                System.out.print("\033[32m" + String.format("%.2f", pheromone[j]) + "\033[0m ");
+            }
+        }
+        System.out.println();
     }
 
     /**
