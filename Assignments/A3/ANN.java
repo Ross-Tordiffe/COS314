@@ -24,7 +24,8 @@ public class ANN {
     private int total = 0;
     private int noChangeCount = 0;
     private int epoch = 0;
-    private boolean weightChanged = true;
+    private double[] errors;
+    private boolean errorChanged = true;
 
     // Data sets
     ArrayList<double[]> trainRecurrence = new ArrayList<double[]>();
@@ -37,11 +38,11 @@ public class ANN {
 
     // Parameters
     private double learningRate = 0.06;
-    private double trainPercentage = 0.7;
+    private double trainPercentage = 0.57;
     private int hiddenLayerSize = 51;
     private int maxTrainEpochs = 50;
-    private final int maxNoChange = 10;
-    private double noChangeTolerance = 0.1;
+    private final int maxNoChange = 8;
+    private double noChangeTolerance = 0.08;
 
     // =======================
     // ===== CONSTRUCTOR =====
@@ -49,9 +50,7 @@ public class ANN {
     public ANN(ArrayList<double[]> dataMatrix, ArrayList<Double> outcomes, Random seededRandom) {
 
         this.random = seededRandom;
-
         printHeader();
-
         initializeRandom();
         organiseData(dataMatrix, outcomes);
 
@@ -60,6 +59,7 @@ public class ANN {
           // number of epochs has been reached
 
         runTestEpoch();
+        printTestingHeader();
     }
 
     // ===================
@@ -126,7 +126,8 @@ public class ANN {
     private boolean runTrainEpoch(ArrayList<double[]> dataMatrix, ArrayList<Double> outcomes) {
 
         this.epoch++;
-        this.weightChanged = false;
+        // this.weightChanged = false;
+        this.errorChanged = false;
         boolean useRecurrence = false;
 
         ArrayList<double[]> currentRecurrenceSet = new ArrayList<double[]>();
@@ -161,13 +162,16 @@ public class ANN {
         }
 
         // If the weights have not changed sufficiently, increment the no change count
-        if (!weightChanged) {
+        // if (!weightChanged) {
+        if (this.errorChanged) {
             noChangeCount++;
+            System.out.println(String.format(" %-19s \u001B[31m%.4f", epoch,
+                    averageError) + "\u001B[0m");
         } else {
             noChangeCount = 0;
+            System.out.println(String.format(" %-19s \u001B[32m%.4f", epoch,
+                    averageError) + "\u001B[0m");
         }
-
-        System.out.println("Epoch: " + epoch + " Error: " + averageError / (trainRecurrence.size() * 2));
 
         // If the weights have not changed for a number of epochs, return false
         if (noChangeCount >= maxNoChange) {
@@ -188,6 +192,7 @@ public class ANN {
                 test(testNoRecurrence.remove(random.nextInt(testNoRecurrence.size())), 0.0);
             }
         }
+
     }
 
     // ===========================================
@@ -228,29 +233,29 @@ public class ANN {
     private void backpropagation(Double target) {
 
         // Calculate the error of the output layer
-        Double outputError = calcErrorOutput(outputLayerNode, target);
+        Double outputError = calcOutputError(outputLayerNode, target);
         double originalWeight = 0.0;
 
         // Update the weights of the HO connections
         for (int i = 0; i < weightsHO.length; i++) {
             originalWeight = weightsHO[i];
             weightsHO[i] += learningRate * outputError * hiddenLayerNodes[i];
-            if (Math.abs(originalWeight - weightsHO[i]) > noChangeTolerance) {
-                this.weightChanged = true;
-            }
+            // if (Math.abs(originalWeight - weightsHO[i]) > noChangeTolerance) {
+            // this.weightChanged = true;
+            // }
         }
 
         // update the bias weight
         originalWeight = outputBiasWeight;
         outputBiasWeight += learningRate * outputError * outputBias;
-        if (Math.abs(originalWeight - outputBiasWeight) > noChangeTolerance) {
-            this.weightChanged = true;
-        }
+        // if (Math.abs(originalWeight - outputBiasWeight) > noChangeTolerance) {
+        // this.weightChanged = true;
+        // }
 
         // Calculate the error of the hidden layer
         Double hiddenError[] = new Double[hiddenLayerNodes.length];
         for (int i = 0; i < hiddenLayerNodes.length; i++) {
-            hiddenError[i] = calcErrorHidden(hiddenLayerNodes[i], outputError, weightsHO, i);
+            hiddenError[i] = calcHiddenError(hiddenLayerNodes[i], outputError, weightsHO, i);
         }
 
         // Update the weights of the IH connections
@@ -258,9 +263,9 @@ public class ANN {
             for (int j = 0; j < weightsIH[i].length; j++) {
                 originalWeight = weightsIH[i][j];
                 weightsIH[i][j] += learningRate * hiddenError[j] * inputLayerNodes[i];
-                if (Math.abs(originalWeight - weightsIH[i][j]) > noChangeTolerance) {
-                    this.weightChanged = true;
-                }
+                // if (Math.abs(originalWeight - weightsIH[i][j]) > noChangeTolerance) {
+                // this.weightChanged = true;
+                // }
             }
         }
 
@@ -268,9 +273,9 @@ public class ANN {
         for (int i = 0; i < hiddenBiasWeights.length; i++) {
             originalWeight = hiddenBiasWeights[i];
             hiddenBiasWeights[i] += learningRate * hiddenError[i] * hiddenBias;
-            if (Math.abs(originalWeight - hiddenBiasWeights[i]) > noChangeTolerance) {
-                this.weightChanged = true;
-            }
+            // if (Math.abs(originalWeight - hiddenBiasWeights[i]) > noChangeTolerance) {
+            // this.weightChanged = true;
+            // }
         }
     }
 
@@ -340,9 +345,10 @@ public class ANN {
      * @param target
      * @return
      */
-    private double calcErrorOutput(Double output, Double target) {
+    private double calcOutputError(Double output, Double target) {
         // (target - output) * derivative of activation function
-        return (target - output) * sigmoidDerivative(output);
+        double outputError = (target - output) * sigmoidDerivative(output);
+        return outputError;
     }
 
     /**
@@ -353,10 +359,14 @@ public class ANN {
      * @param index
      * @return
      */
-    private double calcErrorHidden(Double hidden, Double outputError, Double[] weightsHO, int index) {
+    private double calcHiddenError(Double hidden, Double outputError, Double[] weightsHO, int index) {
         // (outputError * weightsHO) * derivative of activation function
-        double error = outputError * weightsHO[index];
-        return error * ReLuDerivative(hidden);
+        double error = (outputError * weightsHO[index]) * ReLuDerivative(hidden);
+        if ((error - this.errors[index]) > noChangeTolerance) {
+            this.errorChanged = true;
+        }
+        this.errors[index] = error;
+        return error;
     }
 
     // =============================
@@ -372,16 +382,19 @@ public class ANN {
         // Initalize the hidder layer
         hiddenLayerNodes = new Double[hiddenLayerSize];
         hiddenBiasWeights = new double[hiddenLayerNodes.length];
+        this.errors = new double[hiddenLayerNodes.length];
 
         // Initialize hidden weights
         weightsIH = new Double[inputLayerNodes.length][hiddenLayerNodes.length];
         for (int i = 0; i < weightsIH.length; i++) {
             for (int j = 0; j < weightsIH[i].length; j++) {
                 weightsIH[i][j] = randomInitilization();
+
                 if (i == 0) {
                     hiddenBiasWeights[j] = randomInitilization();
                 }
             }
+            this.errors[i] = 0.0;
         }
 
         // Initialize output weights
@@ -425,7 +438,8 @@ public class ANN {
             }
         }
 
-        while (trainRecurrence.size() < recurrence.size() * this.trainPercentage) {
+        int initalSize = recurrence.size();
+        while (trainRecurrence.size() < initalSize * this.trainPercentage) {
             int randomIndex = random.nextInt(recurrence.size());
             trainRecurrence.add(recurrence.remove(randomIndex));
             int randomIndex2 = random.nextInt(no_recurrence.size());
@@ -443,7 +457,7 @@ public class ANN {
     // ===== PRINT FUNCTIONS =====
     // ===========================
     private void printHeader() {
-        System.out.println("===== Artificial Neural Network =====");
+        System.out.println("\n===== Artificial Neural Network =====");
         System.out.println("=====================================");
         System.out.println("------------ Parameters ------------- ");
         System.out.println("Learning Rate              " + this.learningRate);
@@ -453,6 +467,19 @@ public class ANN {
         System.out.println("Max Epochs Without Change  " + this.maxNoChange);
         System.out.println("No Change Tolerance        " + this.noChangeTolerance);
         System.out.println("=====================================");
+        System.out.println("------------- Training --------------");
+        System.out.println("  Epoch                  Error       \n");
+    }
+
+    private void printTestingHeader() {
+        System.out.println("=====================================");
+        System.out.println("------------- Testing ---------------");
+        System.out.println(String.format("%-27s", "Datasets") + total);
+        System.out.println(String.format("%-31s", "Correct:Incorrect\u001B[32m") + correct + "\u001B[0m:\u001B[31m"
+                + (total - correct) + "\u001B[0m");
+        System.out.println(String.format("%-26s", "Accuracy") + String.format("%.2f", getAccuracy() * 100)
+                + "%");
+        System.out.println("=====================================\n");
     }
 
 }
