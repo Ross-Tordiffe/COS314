@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Random;
 
 public class ACO extends Helper {
 
@@ -11,10 +10,6 @@ public class ACO extends Helper {
     double averageFitness = 0;
     double timeTaken = 0;
     int bestIteration = 0;
-
-    Random seededRandom;
-
-    boolean once = false;
 
     // ACO parameters (constants)
     final int MAX_ITERATIONS = 200;
@@ -32,10 +27,9 @@ public class ACO extends Helper {
     double pheromone[];
     double Q;
 
-    public ACO(Knapsack initalKnapsack, Random seededRandom) {
+    public ACO(Knapsack initalKnapsack) {
 
         double startTime = System.nanoTime();
-        this.seededRandom = seededRandom;
         double previousBestFitness;
 
         knapsack = initalKnapsack;
@@ -124,7 +118,7 @@ public class ACO extends Helper {
                 }
 
                 // Generate a random number between 0 and sum
-                double random = seededRandom.nextDouble() * sum;
+                double random = Math.random() * sum;
                 double cumulativeProbability = 0;
                 int selected = -1;
 
@@ -211,7 +205,6 @@ public class ACO extends Helper {
         }
 
         findBestSolution();
-
     }
 
     /**
@@ -248,7 +241,7 @@ public class ACO extends Helper {
                 continue;
             }
 
-            int add = outItems.get((int) (seededRandom.nextDouble() * outItems.size()));
+            int add = outItems.get((int) (Math.random() * outItems.size()));
 
             // Remove the item with the lowest value to weight ratio and add a random item
             ants.get(i)[remove] = false;

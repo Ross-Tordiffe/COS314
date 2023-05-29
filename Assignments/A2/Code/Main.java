@@ -1,6 +1,4 @@
-
 import java.util.HashMap;
-import java.util.Random;
 
 public class Main extends Helper {
     public static void main(String[] args) {
@@ -102,11 +100,8 @@ public class Main extends Helper {
                 double averageTime = 0;
                 double bestFitness = 0;
 
-                double seed = System.currentTimeMillis();
-                Random random = new Random((long) seed);
-
                 for (int i = 0; i < RUN_COUNT; i++) {
-                    ACO aco = new ACO(knapsack, random);
+                    ACO aco = new ACO(knapsack);
 
                     if (first) {
                         first = false;
@@ -151,5 +146,7 @@ public class Main extends Helper {
                         + " | Average Out By: " + averageOutBy);
             }
         }
+
+        System.out.println("Done");
     }
 }

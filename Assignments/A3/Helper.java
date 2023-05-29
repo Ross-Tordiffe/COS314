@@ -1,0 +1,199 @@
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+public class Helper {
+
+    private static double[] averages;
+    private static ArrayList<double[]> dataMatrix = new ArrayList<double[]>();
+    private static ArrayList<Double> outcomes = new ArrayList<Double>();
+    private static ArrayList<String[]> attributeInformation = getAttributeInformation();
+    private final static int NUM_ATTRIBUTES = 10;
+    private final static int TOTAL_ATTRIBUTES = 51;
+
+    /**
+     * 
+     * @param folderName
+     * @return a normalized data array
+     */
+    public static void readBreastCancerData(String filename) {
+
+        ArrayList<double[]> data = new ArrayList<double[]>();
+        ArrayList<String[]> lineMatrix = new ArrayList<String[]>();
+        File file = new File(filename);
+        BufferedReader br = null;
+        String line = "";
+        averages = new double[NUM_ATTRIBUTES];
+
+        try {
+            br = new BufferedReader(new FileReader(file));
+            while ((line = br.readLine()) != null) {
+                String[] lineData = line.split(",");
+                lineMatrix.add(lineData);
+                double[] instance = handleStringData(lineData);
+                data.add(instance);
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found");
+        } catch (IOException e) {
+            System.out.println("IO Exception");
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    System.out.println("IO Exception");
+                }
+            }
+        }
+
+        for (int i = 0; i < averages.length; i++) {
+            averages[i] = Math.round(averages[i] /= data.size());
+        }
+
+        for (int i = 0; i < data.size(); i++) { // For each instance
+            if (data.get(i)[0] == 0) { // Assign the outcome
+                outcomes.add(0.0);
+            } else {
+                outcomes.add(1.0);
+            }
+
+            dataMatrix.add(fillHotOne(data.get(i)));
+
+        }
+    }
+
+    /**
+     * @brief returns a numerically encoded array from a string of tabular data
+     * 
+     * @param line
+     */
+    private static double[] handleStringData(String[] line) {
+
+        double[] instance = new double[10];
+
+        for (int i = 0; i < attributeInformation.size(); i++) {
+            for (int j = 0; j < attributeInformation.get(i).length; j++) {
+                if (line[i].equals("?")) {
+                    instance[i] = -1;
+                    continue;
+                }
+                if (line[i].equals(attributeInformation.get(i)[j])) {
+                    instance[i] = (double) j;
+                    averages[i] += j;
+                    continue;
+                }
+            }
+        }
+
+        return instance;
+    }
+
+    private static double[] fillHotOne(double[] instance) {
+
+        double[] hotOne = new double[TOTAL_ATTRIBUTES];
+        ArrayList<String[]> attributeInformation = getAttributeInformation();
+        int index = 0;
+
+        for (int i = 1; i < attributeInformation.size(); i++) {
+            for (int j = 0; j < attributeInformation.get(i).length; j++) {
+                if (instance[i] == j || (instance[i] == -1 && averages[i] == j)) {
+                    hotOne[index] = 1;
+                    if ((instance[i] == -1 && averages[i] == j)) {
+                    }
+                } else {
+                    hotOne[index] = 0;
+                }
+                index++;
+            }
+        }
+
+        // printDataInstance(hotOne);
+
+        return hotOne;
+    }
+
+    public static void printDataMatrix(double[][] dataMatrix, String[][] lineMatrix) {
+
+        for (int i = 0; i < dataMatrix.length; i++) {
+            System.out.print(i + ": [");
+            for (int j = 0; j < lineMatrix[i].length; j++) {
+                System.out.print(lineMatrix[i][j]);
+                if (j != lineMatrix[i].length - 1) {
+                    System.out.print(", ");
+                }
+            }
+            System.out.println("]");
+            System.out.print("    [");
+            for (int j = 0; j < dataMatrix[i].length; j++) {
+                System.out.print(dataMatrix[i][j]);
+                if (j != dataMatrix[i].length - 1) {
+                    System.out.print(", ");
+                }
+            }
+            System.out.println("]");
+        }
+    }
+
+    public static void printDataString(String[] data) {
+        System.out.print("[");
+        for (int i = 0; i < data.length; i++) {
+            System.out.print(data[i]);
+            if (i != data.length - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
+    }
+
+    public static void printDataInstance(double[] data) {
+        System.out.print("[");
+        for (int i = 0; i < data.length; i++) {
+            System.out.print(data[i]);
+            if (i != data.length - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
+    }
+
+    /**
+     * @brief returns a list of all possible values for each attribute
+     * @return
+     */
+    private static ArrayList<String[]> getAttributeInformation() {
+
+        ArrayList<String[]> attributeInformation = new ArrayList<String[]>();
+        attributeInformation.add(new String[] { "no-recurrence-events", "recurrence-events" });
+        attributeInformation.add(new String[] { "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79",
+                "80-89", "90-99" });
+        attributeInformation.add(new String[] { "lt40", "ge40", "premeno" });
+        attributeInformation.add(new String[] { "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
+                "35-39", "40-44", "45-49", "50-54", "55-59" });
+        attributeInformation.add(new String[] { "0-2", "3-5", "6-8", "9-11", "12-14", "15-17", "18-20",
+                "21-23", "24-26", "27-29", "30-32", "33-35", "36-39" });
+        attributeInformation.add(new String[] { "yes", "no" });
+        attributeInformation.add(new String[] { "1", "2", "3" });
+        attributeInformation.add(new String[] { "left", "right" });
+        attributeInformation.add(new String[] { "left_up", "left_low", "right_up", "right_low", "central" });
+        attributeInformation.add(new String[] { "yes", "no" });
+
+        return attributeInformation;
+    }
+
+    /**
+     * @brief returns the data matrix
+     * @return dataMatrix
+     */
+    public static ArrayList<double[]> getDataMatrix() {
+        return dataMatrix;
+    }
+
+    /**
+     * @brief returns the outcomes matrix
+     * @return outcomes
+     */
+    public static ArrayList<Double> getOutcomes() {
+        return outcomes;
+    }
+}

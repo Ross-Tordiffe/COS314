@@ -11,7 +11,11 @@ public class Helper {
     public static HashMap<String, Knapsack> readKnapsackData(String folderName) {
 
         HashMap<String, Knapsack> knapsacks = new HashMap<String, Knapsack>();
-        File folder = new File(folderName);
+        File folder = new File("./Code" + File.separator + folderName);
+        if (!folder.exists()) {
+            folder = new File("./" + folderName);
+        }
+
         File[] listOfFiles = folder.listFiles();
 
         for (File file : listOfFiles) {
