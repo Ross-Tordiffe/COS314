@@ -26,6 +26,7 @@ public class ANN {
     private int epoch = 0;
     private double[] errors;
     private boolean errorChanged = true;
+    private boolean doPrinting = true;
 
     // Data sets
     ArrayList<double[]> trainRecurrence = new ArrayList<double[]>();
@@ -41,7 +42,7 @@ public class ANN {
     private double trainPercentage = 0.57;
     private int hiddenLayerSize = 51;
     private int maxTrainEpochs = 50;
-    private final int maxNoChange = 8;
+    private final int maxNoChange = 5;
     private double noChangeTolerance = 0.08;
 
     // =======================
@@ -165,12 +166,14 @@ public class ANN {
         // if (!weightChanged) {
         if (this.errorChanged) {
             noChangeCount++;
-            System.out.println(String.format(" %-19s \u001B[31m%.4f", epoch,
-                    averageError) + "\u001B[0m");
+            if (doPrinting)
+                System.out.println(String.format(" %-19s \u001B[31m%.4f", epoch,
+                        averageError) + "\u001B[0m");
         } else {
             noChangeCount = 0;
-            System.out.println(String.format(" %-19s \u001B[32m%.4f", epoch,
-                    averageError) + "\u001B[0m");
+            if (doPrinting)
+                System.out.println(String.format(" %-19s \u001B[32m%.4f", epoch,
+                        averageError) + "\u001B[0m");
         }
 
         // If the weights have not changed for a number of epochs, return false
@@ -240,17 +243,11 @@ public class ANN {
         for (int i = 0; i < weightsHO.length; i++) {
             originalWeight = weightsHO[i];
             weightsHO[i] += learningRate * outputError * hiddenLayerNodes[i];
-            // if (Math.abs(originalWeight - weightsHO[i]) > noChangeTolerance) {
-            // this.weightChanged = true;
-            // }
         }
 
         // update the bias weight
         originalWeight = outputBiasWeight;
         outputBiasWeight += learningRate * outputError * outputBias;
-        // if (Math.abs(originalWeight - outputBiasWeight) > noChangeTolerance) {
-        // this.weightChanged = true;
-        // }
 
         // Calculate the error of the hidden layer
         Double hiddenError[] = new Double[hiddenLayerNodes.length];
@@ -263,9 +260,6 @@ public class ANN {
             for (int j = 0; j < weightsIH[i].length; j++) {
                 originalWeight = weightsIH[i][j];
                 weightsIH[i][j] += learningRate * hiddenError[j] * inputLayerNodes[i];
-                // if (Math.abs(originalWeight - weightsIH[i][j]) > noChangeTolerance) {
-                // this.weightChanged = true;
-                // }
             }
         }
 
@@ -457,29 +451,34 @@ public class ANN {
     // ===== PRINT FUNCTIONS =====
     // ===========================
     private void printHeader() {
-        System.out.println("\n===== Artificial Neural Network =====");
-        System.out.println("=====================================");
-        System.out.println("------------ Parameters ------------- ");
-        System.out.println("Learning Rate              " + this.learningRate);
-        System.out.println("Hidden Layer Size          " + this.hiddenLayerSize);
-        System.out.println("Training Percentage        " + String.format("%.1f", (this.trainPercentage * 100)) + "%");
-        System.out.println("Max Train Epochs           " + this.maxTrainEpochs);
-        System.out.println("Max Epochs Without Change  " + this.maxNoChange);
-        System.out.println("No Change Tolerance        " + this.noChangeTolerance);
-        System.out.println("=====================================");
-        System.out.println("------------- Training --------------");
-        System.out.println("  Epoch                  Error       \n");
+        if (doPrinting) {
+            System.out.println("\n===== Artificial Neural Network =====");
+            System.out.println("=====================================");
+            System.out.println("------------ Parameters ------------- ");
+            System.out.println("Learning Rate              " + this.learningRate);
+            System.out.println("Hidden Layer Size          " + this.hiddenLayerSize);
+            System.out
+                    .println("Training Percentage        " + String.format("%.1f", (this.trainPercentage * 100)) + "%");
+            System.out.println("Max Train Epochs           " + this.maxTrainEpochs);
+            System.out.println("Max Epochs Without Change  " + this.maxNoChange);
+            System.out.println("No Change Tolerance        " + this.noChangeTolerance);
+            System.out.println("=====================================");
+            System.out.println("------------- Training --------------");
+            System.out.println("  Epoch                  Error       \n");
+        }
     }
 
     private void printTestingHeader() {
-        System.out.println("=====================================");
-        System.out.println("------------- Testing ---------------");
-        System.out.println(String.format("%-27s", "Datasets") + total);
-        System.out.println(String.format("%-31s", "Correct:Incorrect\u001B[32m") + correct + "\u001B[0m:\u001B[31m"
-                + (total - correct) + "\u001B[0m");
-        System.out.println(String.format("%-26s", "Accuracy") + String.format("%.2f", getAccuracy() * 100)
-                + "%");
-        System.out.println("=====================================\n");
+        if (doPrinting) {
+            System.out.println("=====================================");
+            System.out.println("------------- Testing ---------------");
+            System.out.println(String.format("%-27s", "Datasets") + total);
+            System.out.println(String.format("%-31s", "Correct:Incorrect\u001B[32m") + correct + "\u001B[0m:\u001B[31m"
+                    + (total - correct) + "\u001B[0m");
+            System.out.println(String.format("%-26s", "Accuracy") + String.format("%.2f", getAccuracy() * 100)
+                    + "%");
+            System.out.println("=====================================\n");
+        }
     }
 
 }

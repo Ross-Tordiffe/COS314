@@ -10,11 +10,10 @@ public class Main extends Helper {
         ArrayList<Double> outcomes = getOutcomes();
 
         // seed the random number generator for the ANN
-        double seed = 0.6853354025016832; // 86.79% for ANN
-        Random seededRandom = new Random(Double.doubleToLongBits(seed));
+        double seed = 0.8430774216036232; // for 100 runs, avg 71.84%, max 87.10%, min 51.56% (2 cases below 60%) ANN.
 
+        Random seededRandom = new Random(Double.doubleToLongBits(seed));
         ANN ann = new ANN(dataMatrix, outcomes, seededRandom);
-        System.out.println(String.format("%.2f", ann.getAccuracy()) + "%");
 
     }
 }
