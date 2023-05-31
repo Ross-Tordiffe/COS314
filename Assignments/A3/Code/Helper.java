@@ -1,11 +1,14 @@
+package Code;
+
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class Helper {
 
     private static double[] averages;
+    private static ArrayList<double[]> hotDataMatrix = new ArrayList<double[]>();
     private static ArrayList<double[]> dataMatrix = new ArrayList<double[]>();
+    private static ArrayList<String[]> stringDataMatrix = new ArrayList<String[]>();
     private static ArrayList<Double> outcomes = new ArrayList<Double>();
     private static ArrayList<String[]> attributeInformation = getAttributeInformation();
     private final static int NUM_ATTRIBUTES = 10;
@@ -20,7 +23,8 @@ public class Helper {
 
         ArrayList<double[]> data = new ArrayList<double[]>();
         ArrayList<String[]> lineMatrix = new ArrayList<String[]>();
-        File file = new File(filename);
+        // File is in sibling directory called Data
+        File file = new File("Data\\" + filename);
         BufferedReader br = null;
         String line = "";
         averages = new double[NUM_ATTRIBUTES];
@@ -51,15 +55,26 @@ public class Helper {
             averages[i] = Math.round(averages[i] /= data.size());
         }
 
+        // fill hot data matrix
         for (int i = 0; i < data.size(); i++) { // For each instance
             if (data.get(i)[0] == 0) { // Assign the outcome
                 outcomes.add(0.0);
             } else {
                 outcomes.add(1.0);
             }
+            hotDataMatrix.add(fillHotOne(data.get(i)));
+        }
 
-            dataMatrix.add(fillHotOne(data.get(i)));
+        dataMatrix = data;
 
+        // fill string data matrix and data matrix average values
+        for (int i = 0; i < stringDataMatrix.size(); i++) {
+            for (int j = 0; j < stringDataMatrix.get(i).length; j++) {
+                if (stringDataMatrix.get(i)[j].equals("?")) {
+                    stringDataMatrix.get(i)[j] = attributeInformation.get(j)[(int) averages[j]];
+                    dataMatrix.get(i)[j] = averages[j];
+                }
+            }
         }
     }
 
@@ -71,7 +86,7 @@ public class Helper {
     private static double[] handleStringData(String[] line) {
 
         double[] instance = new double[10];
-
+        String[] stringValues = new String[10];
         for (int i = 0; i < attributeInformation.size(); i++) {
             for (int j = 0; j < attributeInformation.get(i).length; j++) {
                 if (line[i].equals("?")) {
@@ -84,7 +99,10 @@ public class Helper {
                     continue;
                 }
             }
+            stringValues[i] = line[i];
         }
+
+        stringDataMatrix.add(stringValues);
 
         return instance;
     }
@@ -161,7 +179,7 @@ public class Helper {
      * @brief returns a list of all possible values for each attribute
      * @return
      */
-    private static ArrayList<String[]> getAttributeInformation() {
+    public static ArrayList<String[]> getAttributeInformation() {
 
         ArrayList<String[]> attributeInformation = new ArrayList<String[]>();
         attributeInformation.add(new String[] { "no-recurrence-events", "recurrence-events" });
@@ -182,6 +200,35 @@ public class Helper {
     }
 
     /**
+     * @brief returns a list of names for each attribute
+     * @return
+     */
+    public static ArrayList<String> getAttributeNames() {
+
+        ArrayList<String> attributeNames = new ArrayList<String>();
+        attributeNames.add("Class");
+        attributeNames.add("Age");
+        attributeNames.add("Menopause");
+        attributeNames.add("Tumor Size");
+        attributeNames.add("Inv Nodes");
+        attributeNames.add("Node Caps");
+        attributeNames.add("Deg Malig");
+        attributeNames.add("Breast");
+        attributeNames.add("Breast Quad");
+        attributeNames.add("Irradiat");
+
+        return attributeNames;
+    }
+
+    /**
+     * @brief returns the outcomes matrix hot one encoded
+     * @return hotOutcomes
+     */
+    public static ArrayList<Double> getOutcomes() {
+        return outcomes;
+    }
+
+    /**
      * @brief returns the data matrix
      * @return dataMatrix
      */
@@ -190,10 +237,19 @@ public class Helper {
     }
 
     /**
-     * @brief returns the outcomes matrix
-     * @return outcomes
+     * @brief returns the data matrix hot one encoded
+     * @return hotDataMatrix
      */
-    public static ArrayList<Double> getOutcomes() {
-        return outcomes;
+    public static ArrayList<double[]> getHotDataMatrix() {
+        return hotDataMatrix;
     }
+
+    /**
+     * @brief returns the data matrix unencoded
+     * @return unencodedDataMatrix
+     */
+    public static ArrayList<String[]> getStringDataMatrix() {
+        return stringDataMatrix;
+    }
+
 }

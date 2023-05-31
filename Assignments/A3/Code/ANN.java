@@ -1,17 +1,20 @@
+package Code;
+
 import java.util.Random;
 import java.util.ArrayList;
 
 public class ANN {
 
     // ===== Variables =====
+    // =====================
     // Layer Nodes
     private Double[] inputLayerNodes;
     private Double[] hiddenLayerNodes;
     private Double outputLayerNode;
 
     // Bias Nodes
-    private Double hiddenBias = 1.0;
-    private Double outputBias = 1.0;
+    private final Double hiddenBias = 1.0;
+    private final Double outputBias = 1.0;
 
     // Weights
     private Double[][] weightsIH;
@@ -38,14 +41,13 @@ public class ANN {
     private Random random;
 
     // Parameters
-    private double learningRate = 0.06;
-    private double trainPercentage = 0.57;
-    private int hiddenLayerSize = 51;
-    private int maxTrainEpochs = 50;
+    private final double learningRate = 0.06;
+    private final double trainPercentage = 0.57;
+    private final int hiddenLayerSize = 51;
+    private final int maxTrainEpochs = 50;
     private final int maxNoChange = 5;
-    private double noChangeTolerance = 0.08;
+    private final double noChangeTolerance = 0.08;
 
-    // =======================
     // ===== CONSTRUCTOR =====
     // =======================
     public ANN(ArrayList<double[]> dataMatrix, ArrayList<Double> outcomes, Random seededRandom) {
@@ -63,7 +65,6 @@ public class ANN {
         printTestingHeader();
     }
 
-    // ===================
     // ===== GETTERS =====
     // ===================
     /**
@@ -75,7 +76,6 @@ public class ANN {
         return (double) correct / total;
     }
 
-    // ================================
     // ===== TESTING AND TRAINING =====
     // ================================
     /**
@@ -198,7 +198,6 @@ public class ANN {
 
     }
 
-    // ===========================================
     // ===== FEEDFORWARD AND BACKPROPAGATION =====
     // ===========================================
     /**
@@ -237,16 +236,13 @@ public class ANN {
 
         // Calculate the error of the output layer
         Double outputError = calcOutputError(outputLayerNode, target);
-        double originalWeight = 0.0;
 
         // Update the weights of the HO connections
         for (int i = 0; i < weightsHO.length; i++) {
-            originalWeight = weightsHO[i];
             weightsHO[i] += learningRate * outputError * hiddenLayerNodes[i];
         }
 
         // update the bias weight
-        originalWeight = outputBiasWeight;
         outputBiasWeight += learningRate * outputError * outputBias;
 
         // Calculate the error of the hidden layer
@@ -258,14 +254,12 @@ public class ANN {
         // Update the weights of the IH connections
         for (int i = 0; i < weightsIH.length; i++) {
             for (int j = 0; j < weightsIH[i].length; j++) {
-                originalWeight = weightsIH[i][j];
                 weightsIH[i][j] += learningRate * hiddenError[j] * inputLayerNodes[i];
             }
         }
 
         // update the bias weights
         for (int i = 0; i < hiddenBiasWeights.length; i++) {
-            originalWeight = hiddenBiasWeights[i];
             hiddenBiasWeights[i] += learningRate * hiddenError[i] * hiddenBias;
             // if (Math.abs(originalWeight - hiddenBiasWeights[i]) > noChangeTolerance) {
             // this.weightChanged = true;
@@ -273,7 +267,6 @@ public class ANN {
         }
     }
 
-    // ================================
     // ===== ACTIVATION FUNCTIONS =====
     // ================================
     /**
@@ -328,7 +321,6 @@ public class ANN {
         return n * (1 - n);
     }
 
-    // ==============================
     // ===== ERROR CALCULATIONS =====
     // ==============================
     /**
@@ -363,7 +355,6 @@ public class ANN {
         return error;
     }
 
-    // =============================
     // ===== DATA ORGANISATION =====
     // =============================
     /**
@@ -447,7 +438,6 @@ public class ANN {
 
     }
 
-    // ===========================
     // ===== PRINT FUNCTIONS =====
     // ===========================
     private void printHeader() {
