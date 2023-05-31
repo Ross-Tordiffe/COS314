@@ -13,13 +13,16 @@ public class Main extends Helper {
         ArrayList<Double> outcomes = getOutcomes();
 
         // seed the random number generator for the ANN
-        double seed = 0.8430774216036232; // for 100 runs, avg 71.84%, max 87.10%, min 51.56% (2 cases below 60%) ANN.
+        double ANNSeed = 0.8430774216036232; // for 100 runs, avg 71.84%, max 87.10%, min 51.56% (2 cases below 60%)
+                                             // ANN.
+        double GPSeed = 0.3871152302052989; // for 100 runs, avg 72.01%, max 87.10%, min 51.56% (2 cases below 60%)
+                                            // GP.
 
-        Random seededRandom = new Random(Double.doubleToLongBits(seed));
-        // ANN ann = new ANN(hotOneEncodedDataMatrix, outcomes, seededRandom);
-        for (int i = 0; i < 100; i++) {
-            GP gp = new GP(stringDataMatrix, seededRandom);
-        }
+        Random seededRandomANN = new Random(Double.doubleToLongBits(ANNSeed));
+        ANN ann = new ANN(hotOneEncodedDataMatrix, outcomes, seededRandomANN);
+
+        Random seededRandomGP = new Random(Double.doubleToLongBits(GPSeed));
+        GP gp = new GP(stringDataMatrix, seededRandomGP);
 
     }
 }

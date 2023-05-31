@@ -21,22 +21,24 @@ public class GP {
     // Parameters
     private final int populationSize = 100;
     private final int maxGenerations = 50;
-    private final int maxDepth = 6;
+    private final int maxNoChange = 20;
+    private final int maxDepth = 4;
     private final int minDepth = 2;
-    private final int maxCrossDepth = 3;
-    private final int maxMutDepth = 2;
+    private final int maxCrossDepth = 2;
+    private final int maxMutDepth = 3;
     private final double crossoverRate = 0.8;
-    private final double halfAndHalfRate = 0.5;
+    private final double halfAndHalfRate = 0.8;
     private final double trainingSetPercentage = 0.8;
-    private final double tournamentSize = 0.2;
+    private final double tournamentSize = 0.1;
+
+    // Tracking variables
+    private int noChange = 0;
 
     // ===== Constructor =====
     // =======================
     public GP(ArrayList<String[]> dataMatrix, Random seededRandom) {
 
-        double seed = Math.random();
-        System.out.print(seed + " ");
-        this.seededRandom = new Random(Double.doubleToLongBits(seed));
+        this.seededRandom = seededRandom;
         this.dataMatrix = dataMatrix;
 
         // Generate the initial population
@@ -45,12 +47,30 @@ public class GP {
         // Split the data into training and test sets
         organiseData();
 
+        // System.out.println(" 0 50 100");
+        // System.out.print("Progress: |");
+
         // Run the GP
-        for (int i = 0; i < maxGenerations; i++)
+        for (int i = 0; i < maxGenerations && noChange < maxNoChange; i++) {
+            double oldFitness = bestFitness;
             trainGP();
+            if (bestFitness > oldFitness) {
+                noChange = 0;
+            } else {
+                noChange++;
+            }
+            // System.out.print("=");
+        }
+        // System.out.println("|");
 
         // Test the best tree
         testGP();
+
+        bestTree.printTree();
+        // System.out.println("Accuracy: " + String.format("%.2f", bestTree.getFitness()
+        // * 100.0) + "%");
+        if (bestTree.getFitness() * 100 > 81)
+            System.out.println(String.format("%.2f", bestTree.getFitness() * 100.0) + "% ");
     }
 
     // ===== Training and Testing ====
@@ -90,8 +110,6 @@ public class GP {
 
     private void testGP() {
         double fitness = bestTree.evaluate(testSet) * 100.0;
-        if (fitness > 75)
-            System.out.println(String.format("%.2f", fitness) + "%");
     }
 
     // ===== Selection =====
@@ -134,8 +152,6 @@ public class GP {
         DecisionTree[] children = { child1, child2 };
         return children;
     }
-
-    // Mutation
 
     private DecisionTree[] mutate(DecisionTree parent1, DecisionTree parent2) {
 
@@ -215,12 +231,19 @@ public class GP {
         // Create the training set
         for (int i = 0; i < trainingSetSize; i++) {
             trainingSet.add(recurrenceEvents.remove(seededRandom.nextInt(recurrenceEvents.size())));
-            trainingSet.add(noRecurrenceEvents.remove(seededRandom.nextInt(noRecurrenceEvents.size())));
         }
 
         // Create the test set
         while (recurrenceEvents.size() > 0) {
             testSet.add(recurrenceEvents.remove(seededRandom.nextInt(recurrenceEvents.size())));
+        }
+
+        int noRecurrenceTrainingSetSize = (int) (noRecurrenceEvents.size() * trainingSetPercentage);
+        for (int i = 0; i < noRecurrenceTrainingSetSize; i++) {
+            trainingSet.add(noRecurrenceEvents.remove(seededRandom.nextInt(noRecurrenceEvents.size())));
+        }
+
+        while (noRecurrenceEvents.size() > 0) {
             testSet.add(noRecurrenceEvents.remove(seededRandom.nextInt(noRecurrenceEvents.size())));
         }
     }

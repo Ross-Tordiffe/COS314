@@ -11,12 +11,6 @@ public abstract class Node implements Cloneable {
         this.attribute = attribute;
     }
 
-    public Node(Node nodeToReplace) {
-        this.attribute = nodeToReplace.getAttribute();
-        this.index = nodeToReplace.getIndex();
-        this.depth = nodeToReplace.getDepth();
-    }
-
     public boolean isEndNode() {
         return false;
     }

@@ -10,11 +10,6 @@ public class EndNode extends Node {
         this.depth = depth;
     }
 
-    public EndNode(Node nodeToReplace) {
-        super(nodeToReplace);
-        this.outcome = ((EndNode) nodeToReplace).getOutcome();
-    }
-
     public boolean getOutcome() {
         return outcome;
     }
@@ -31,7 +26,7 @@ public class EndNode extends Node {
 
     @Override
     public void print() {
-        System.out.println("-".repeat(depth * 2) + (outcome ? "(1) Recurrence" : "(0) No Recurrence"));
+        System.out.println(depth + "-".repeat(depth * 4) + (outcome ? "(1) Recurrence" : "(0) No Recurrence"));
     }
 
 }

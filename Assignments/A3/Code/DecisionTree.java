@@ -112,7 +112,10 @@ public class DecisionTree extends Helper {
         } else if (availableAttributes.size() > 0) {
             return createChanceNode(availableAttributes, depth); // Create a chance node
         } else {
-            System.out.println("Error: No attributes left to choose from"); // This should never happen
+            System.out.println("Error: No attributes left to choose from. Check maxDepth < number of attributes"); // This
+                                                                                                                   // should
+                                                                                                                   // never
+                                                                                                                   // happen
             return null;
         }
     }
@@ -158,9 +161,9 @@ public class DecisionTree extends Helper {
         otherTree.addToAllNodesList(thisNode);
 
         int thisDepth = thisNode.getDepth(), otherDepth = otherNode.getDepth();
-        thisParent.getChildren().set(thisIndex, checkPrune(thisNode, otherDepth,
+        thisParent.replaceChild(thisIndex, checkPrune(thisNode, otherDepth,
                 crossDepth));
-        otherParent.getChildren().set(otherIndex, checkPrune(otherNode, thisDepth,
+        otherParent.replaceChild(otherIndex, checkPrune(otherNode, thisDepth,
                 crossDepth));
 
         // Update the fitness
@@ -174,14 +177,14 @@ public class DecisionTree extends Helper {
         int startDepth = node.getDepth();
 
         DecisionTree subtree = new DecisionTree(mutationDepth, seededRandom, false, attributeList, node.getDepth());
-        parent.getChildren().set(parent.getChildren().indexOf(node),
+        parent.replaceChild(parent.getChildren().indexOf(node),
                 checkPrune(subtree.getRoot(), startDepth, mutationDepth));
     }
 
     public void shrinkMutate(int mutationDepth) {
         Node node = getRandomNode();
         ChanceNode parent = (ChanceNode) node.getParent();
-        parent.getChildren().set(parent.getChildren().indexOf(node), new EndNode("Class", seededRandom.nextBoolean(),
+        parent.replaceChild(parent.getChildren().indexOf(node), new EndNode("Class", seededRandom.nextBoolean(),
                 node.getDepth()));
     }
 

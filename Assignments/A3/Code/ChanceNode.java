@@ -20,15 +20,6 @@ public class ChanceNode extends Node {
         }
     }
 
-    public ChanceNode(Node nodeToReplace) {
-        super(nodeToReplace);
-        this.values = ((ChanceNode) nodeToReplace).getValues();
-        this.children = ((ChanceNode) nodeToReplace).getChildren();
-        for (Node child : children) {
-            child.setParent(this);
-        }
-    }
-
     public ArrayList<Node> getChildren() {
         return children;
     }
@@ -53,6 +44,11 @@ public class ChanceNode extends Node {
         return null;
     }
 
+    public void replaceChild(int index, Node child) {
+        this.children.set(index, child);
+        child.setParent(this);
+    }
+
     @Override
     public Node copy() {
         ArrayList<Node> newChildren = new ArrayList<Node>();
@@ -65,7 +61,7 @@ public class ChanceNode extends Node {
     @Override
     public void print() {
         System.out.println(
-                "=".repeat((depth * 2) + 1) + "[" + this.children.size() + "]" + this.getAttribute() + " - > " + this);
+                depth + "=".repeat((depth * 4) + 1) + "[" + this.children.size() + "]" + this.getAttribute());
         for (Node child : children) {
             child.print();
         }
