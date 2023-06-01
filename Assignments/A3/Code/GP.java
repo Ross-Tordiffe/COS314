@@ -33,6 +33,8 @@ public class GP {
 
     // Tracking variables
     private int noChange = 0;
+    private boolean doPrinting = true;
+    private int generation = 0;
 
     // ===== Constructor =====
     // =======================
@@ -46,10 +48,7 @@ public class GP {
 
         // Split the data into training and test sets
         organiseData();
-
-        // System.out.println(" 0 50 100");
-        // System.out.print("Progress: |");
-
+        printHeader();
         // Run the GP
         for (int i = 0; i < maxGenerations && noChange < maxNoChange; i++) {
             double oldFitness = bestFitness;
@@ -59,22 +58,17 @@ public class GP {
             } else {
                 noChange++;
             }
-            // System.out.print("=");
+            generation++;
         }
-        // System.out.println("|");
 
         // Test the best tree
+        printTestingHeader();
         testGP();
-
-        bestTree.printTree();
-        // System.out.println("Accuracy: " + String.format("%.2f", bestTree.getFitness()
-        // * 100.0) + "%");
-        if (bestTree.getFitness() * 100 > 81)
-            System.out.println(String.format("%.2f", bestTree.getFitness() * 100.0) + "% ");
+        printResults();
     }
 
     // ===== Training and Testing ====
-    // =====================
+    // ===============================
     private void trainGP() {
 
         double currentFitness = evaluatePopulation(population, trainingSet);
@@ -102,8 +96,14 @@ public class GP {
         }
 
         // Generational replacement
-        if (evaluatePopulation(newPopulation, trainingSet) > currentFitness) {
+        double newFitness = evaluatePopulation(newPopulation, trainingSet);
+        if (newFitness > currentFitness) {
             population = newPopulation;
+            System.out.println("    " + String.format(" %-19s \u001B[32m%.1f", generation,
+                    (newFitness * 100)) + "%\u001B[0m");
+        } else {
+            System.out.println("    " + String.format(" %-19s \u001B[31m%.1f", generation,
+                    (newFitness * 100)) + "%\u001B[0m");
         }
 
     }
@@ -245,6 +245,93 @@ public class GP {
 
         while (noRecurrenceEvents.size() > 0) {
             testSet.add(noRecurrenceEvents.remove(seededRandom.nextInt(noRecurrenceEvents.size())));
+        }
+    }
+
+    // ===== PRINT FUNCTIONS =====
+    // ===========================
+
+    private void printHeader() {
+        if (doPrinting) {
+            // ascii art of a tree
+            System.out.println("   ____  ____ ");
+            System.out.println("  / ___||  _ \\");
+            System.out.println(" | |  _|| |_) |");
+            System.out.println(" | |_| ||  __/ ");
+            System.out.println("  \\____||_|   ");
+            System.out.println("\n=== Genetic Programming Algorith ===");
+            System.out.println("=====================================");
+            System.out.println("------------ Parameters ------------- ");
+            System.out.println("Population Size              " + populationSize);
+            System.out.println("Max Generations              " + maxGenerations);
+            System.out.println("Max No Change                " + maxNoChange);
+            System.out.println("Max Depth                    " + maxDepth);
+            System.out.println("Min Depth                    " + minDepth);
+            System.out.println("Max Crossover Depth          " + maxCrossDepth);
+            System.out.println("Max Mutation Depth           " + maxMutDepth);
+            System.out.println("Crossover Rate               " + crossoverRate);
+            System.out.println("Half and Half Rate           " + halfAndHalfRate);
+            System.out.println(
+                    "Training Set Percentage      " + String.format("%.2f", trainingSetPercentage * 100) + "%");
+            System.out.println("Tournament Size              " + tournamentSize);
+            System.out.println("=====================================");
+            System.out.println("------------- Training --------------");
+            System.out.println(String.format("  %-24s", "Datasets") + trainingSet.size());
+            System.out.println("-------------------------------------");
+            System.out.println("  Evolution         Average Accuracy\n");
+        }
+    }
+
+    private void printTestingHeader() {
+        if (doPrinting) {
+            System.out.println("=====================================");
+            System.out.println("------------- Testing ---------------");
+            System.out.println(String.format("  %-24s", "Datasets") + testSet.size());
+            System.out.println("------------ Best Tree --------------");
+            this.bestTree.printTree();
+        }
+    }
+
+    private void printResults() {
+        if (doPrinting) {
+            System.out.println("=====================================");
+            System.out.println("------------- Findings --------------");
+            System.out.println(String.format("%-26s", "| True Positive") + this.bestTree.getConfusionMatrix()[0][0]
+                    + "\u001B[2m     // recurrence events correctly classified \u001B[0m");
+            System.out.println(String.format("%-26s", "| True Negative") + this.bestTree.getConfusionMatrix()[1][1]
+                    + "\u001B[2m    // non-recurrence events correctly classified \u001B[0m");
+            System.out.println(String.format("%-26s", "| False Positive") + this.bestTree.getConfusionMatrix()[0][1]
+                    + "\u001B[2m     // non-recurrence events incorrectly classified \u001B[0m");
+            System.out.println(String.format("%-26s", "| False Negative") + this.bestTree.getConfusionMatrix()[1][0]
+                    + "\u001B[2m      // recurrence events incorrectly classified \u001B[0m");
+
+            System.out.println("-------------------------------------");
+            System.out.println(" --- Positive ---");
+            System.out.println(
+                    String.format("%-26s", "Positive Precision")
+                            + String.format("%.2f", this.bestTree.getBinaryPrecision() * 100));
+
+            System.out.println(
+                    String.format("%-26s", "Positive Recall") + String.format("%.2f", this.bestTree.getRecall() * 100));
+
+            System.out
+                    .println(String.format("%-26s", "Positive F-Measure")
+                            + String.format("%.2f", this.bestTree.getFMeasure() * 100));
+
+            System.out.println("\n --- Negative ---");
+            System.out.println(
+                    String.format("%-26s", "Negative Precision")
+                            + String.format("%.2f", this.bestTree.getNegativePrecision() * 100));
+            System.out.println(
+                    String.format("%-26s", "Negative Recall")
+                            + String.format("%.2f", this.bestTree.getNegativeRecall() * 100));
+            System.out.println(
+                    String.format("%-26s", "Negative F-Measure")
+                            + String.format("%.2f", this.bestTree.getNegativeFMeasure() * 100));
+            System.out.println("\n --- Accuracy ---");
+            System.out.println(String.format("%-26s", "Accuracy")
+                    + String.format("%.2f", this.bestTree.getFitness() * 100) + "%");
+            System.out.println("=====================================\n");
         }
     }
 }

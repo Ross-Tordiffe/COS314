@@ -22,6 +22,10 @@ public class DecisionTree extends Helper {
     private final boolean full;
     private final double terminalProbability = 0.1;
 
+    // Tracking variables
+    private int[][] confusionMatrix = new int[2][2];
+    private int correct = 0;
+
     // ===== CONSTRUCTORS =====
     // =======================
     // Default constructor
@@ -66,8 +70,44 @@ public class DecisionTree extends Helper {
         return fitness;
     }
 
+    public int getCorrect() {
+        return correct;
+    }
+
     public boolean isFull() {
         return full;
+    }
+
+    public int[][] getConfusionMatrix() {
+        return confusionMatrix;
+    }
+
+    public double getFMeasure() {
+        double precision = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
+        double recall = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
+        return 2 * ((precision * recall) / (precision + recall));
+    }
+
+    public double getBinaryPrecision() {
+        return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
+    }
+
+    public double getRecall() {
+        return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
+    }
+
+    public double getNegativeFMeasure() {
+        double precision = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
+        double recall = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
+        return 2 * ((precision * recall) / (precision + recall));
+    }
+
+    public double getNegativePrecision() {
+        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
+    }
+
+    public double getNegativeRecall() {
+        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
     }
 
     public Node getRandomNode() {
@@ -165,9 +205,6 @@ public class DecisionTree extends Helper {
                 crossDepth));
         otherParent.replaceChild(otherIndex, checkPrune(otherNode, thisDepth,
                 crossDepth));
-
-        // Update the fitness
-        fitness = (fitness + otherTree.getFitness()) / 2;
     }
 
     public void growMutate(int mutationDepth) {
@@ -213,7 +250,8 @@ public class DecisionTree extends Helper {
     // ===== Classifier & Evaluation Methods =====
     // ===========================================
     public double evaluate(ArrayList<String[]> data) {
-        int correct = 0;
+        correct = 0;
+        confusionMatrix = new int[2][2];
         for (String[] row : data) {
             if (classify(row)) {
                 correct++;
@@ -229,7 +267,19 @@ public class DecisionTree extends Helper {
 
     private boolean classify(String[] data, Node node) {
         if (node.isEndNode()) {
-            return ((EndNode) node).getOutcome() == (data[0].equals("recurrence-events"));
+            if (((EndNode) node).getOutcome() == true && data[0].equals("recurrence-events")) {
+                confusionMatrix[0][0]++;
+                return true;
+            } else if (((EndNode) node).getOutcome() == true && data[0].equals("no-recurrence-events")) {
+                confusionMatrix[0][1]++;
+                return false;
+            } else if (((EndNode) node).getOutcome() == false && data[0].equals("recurrence-events")) {
+                confusionMatrix[1][0]++;
+                return false;
+            } else if (((EndNode) node).getOutcome() == false && data[0].equals("no-recurrence-events")) {
+                confusionMatrix[1][1]++;
+                return true;
+            }
         } else {
             // Get the index of the attribute
             int index = ((ChanceNode) node).getIndex();

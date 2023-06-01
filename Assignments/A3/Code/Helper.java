@@ -62,7 +62,7 @@ public class Helper {
             } else {
                 outcomes.add(1.0);
             }
-            hotDataMatrix.add(fillHotOne(data.get(i)));
+            hotDataMatrix.add(fillOneHot(data.get(i)));
         }
 
         dataMatrix = data;
@@ -107,28 +107,28 @@ public class Helper {
         return instance;
     }
 
-    private static double[] fillHotOne(double[] instance) {
+    private static double[] fillOneHot(double[] instance) {
 
-        double[] hotOne = new double[TOTAL_ATTRIBUTES];
+        double[] oneHot = new double[TOTAL_ATTRIBUTES];
         ArrayList<String[]> attributeInformation = getAttributeInformation();
         int index = 0;
 
         for (int i = 1; i < attributeInformation.size(); i++) {
             for (int j = 0; j < attributeInformation.get(i).length; j++) {
                 if (instance[i] == j || (instance[i] == -1 && averages[i] == j)) {
-                    hotOne[index] = 1;
+                    oneHot[index] = 1;
                     if ((instance[i] == -1 && averages[i] == j)) {
                     }
                 } else {
-                    hotOne[index] = 0;
+                    oneHot[index] = 0;
                 }
                 index++;
             }
         }
 
-        // printDataInstance(hotOne);
+        // printDataInstance(oneHot);
 
-        return hotOne;
+        return oneHot;
     }
 
     public static void printDataMatrix(double[][] dataMatrix, String[][] lineMatrix) {
@@ -221,7 +221,7 @@ public class Helper {
     }
 
     /**
-     * @brief returns the outcomes matrix hot one encoded
+     * @brief returns the outcomes matrix one hot encoded
      * @return hotOutcomes
      */
     public static ArrayList<Double> getOutcomes() {
@@ -237,7 +237,7 @@ public class Helper {
     }
 
     /**
-     * @brief returns the data matrix hot one encoded
+     * @brief returns the data matrix one hot encoded
      * @return hotDataMatrix
      */
     public static ArrayList<double[]> getHotDataMatrix() {
@@ -250,6 +250,51 @@ public class Helper {
      */
     public static ArrayList<String[]> getStringDataMatrix() {
         return stringDataMatrix;
+    }
+
+    // ===== Print Methods =====
+    // =========================
+
+    public static void printWekaHeader() {
+        System.out.println(" __        _______ _  __    _    ");
+        System.out.println(" \\ \\      / / ____| |/ /   / \\");
+        System.out.println("  \\ \\ /\\ / /|  _| | ' /   / _ \\ ");
+        System.out.println("   \\ V  V / | |___| . \\  / ___ \\ ");
+        System.out.println("    \\_/\\_/  |_____|_|\\_\\/_/   \\_\\");
+        System.out.println("\n== C4.5 Descision Tree using WEKA ==");
+        System.out.println("=====================================");
+        System.out.println("------------- Findings --------------");
+        System.out.println(String.format("%-26s", "| True Positive") + 20
+                + "\u001B[2m     // recurrence events correctly classified \u001B[0m");
+        System.out.println(String.format("%-26s", "| True Negative") + 199
+                + "\u001B[2m    // non-recurrence events correctly classified \u001B[0m");
+        System.out.println(String.format("%-26s", "| False Positive") + 19
+                + "\u001B[2m     // non-recurrence events incorrectly classified \u001B[0m");
+        System.out.println(String.format("%-26s", "| False Negative") + 48
+                + "\u001B[2m      // recurrence events incorrectly classified \u001B[0m");
+
+        System.out.println("-------------------------------------");
+        System.out.println(" --- Positive ---");
+        System.out.println(
+                String.format("%-26s", "Positive Precision") + String.format("%.2f", 0.513 * 100));
+
+        System.out.println(String.format("%-26s", "Positive Recall") + String.format("%.2f", 0.294 * 100));
+
+        System.out
+                .println(String.format("%-26s", "Positive F-Measure") + String.format("%.2f", 0.374 * 100));
+
+        System.out.println("\n --- Negative ---");
+        System.out.println(
+                String.format("%-26s", "Negative Precision") + String.format("%.2f", 0.806 * 100));
+        System.out.println(
+                String.format("%-26s", "Negative Recall") + String.format("%.2f", 0.913 * 100));
+        System.out.println(
+                String.format("%-26s", "Negative F-Measure") + String.format("%.2f", 0.856 * 100));
+        System.out.println("\n --- Accuracy ---");
+        System.out.println(String.format("%-26s", "Accuracy") + String.format("%.2f", 0.765734 * 100)
+                + "%");
+
+        System.out.println("=====================================\n");
     }
 
 }

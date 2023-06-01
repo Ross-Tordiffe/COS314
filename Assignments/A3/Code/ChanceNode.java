@@ -60,8 +60,13 @@ public class ChanceNode extends Node {
 
     @Override
     public void print() {
+        System.out.print(
+                "|");
+        for (int i = 0; i < depth; i++) {
+            System.out.print("\u001B[3" + (i + 3) + "m" + "│" + "\u001B[0m");
+        }
         System.out.println(
-                depth + "=".repeat((depth * 4) + 1) + "[" + this.children.size() + "]" + this.getAttribute());
+                (depth + 1) + "=".repeat((depth * 4) + 1) + "[" + this.children.size() + "]" + this.getAttribute());
         for (Node child : children) {
             child.print();
         }

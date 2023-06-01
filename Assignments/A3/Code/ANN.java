@@ -30,6 +30,7 @@ public class ANN {
     private double[] errors;
     private boolean errorChanged = true;
     private boolean doPrinting = true;
+    private int[][] confusionMatrix = new int[2][2];
 
     // Data sets
     ArrayList<double[]> trainRecurrence = new ArrayList<double[]>();
@@ -41,8 +42,8 @@ public class ANN {
     private Random random;
 
     // Parameters
-    private final double learningRate = 0.06;
-    private final double trainPercentage = 0.57;
+    private final double learningRate = 0.08;
+    private final double trainPercentage = 0.8;
     private final int hiddenLayerSize = 51;
     private final int maxTrainEpochs = 50;
     private final int maxNoChange = 5;
@@ -53,9 +54,10 @@ public class ANN {
     public ANN(ArrayList<double[]> dataMatrix, ArrayList<Double> outcomes, Random seededRandom) {
 
         this.random = seededRandom;
-        printHeader();
+
         initializeRandom();
         organiseData(dataMatrix, outcomes);
+        printHeader();
 
         while (epoch < maxTrainEpochs && runTrainEpoch(dataMatrix, outcomes)) {
         } // Run epochs until the weights have sufficiently converged or the maximum
@@ -74,6 +76,34 @@ public class ANN {
      */
     public double getAccuracy() {
         return (double) correct / total;
+    }
+
+    public double getFMeasure() {
+        double precision = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
+        double recall = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
+        return 2 * ((precision * recall) / (precision + recall));
+    }
+
+    public double getBinaryPrecision() {
+        return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
+    }
+
+    public double getRecall() {
+        return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
+    }
+
+    public double getNegativeFMeasure() {
+        double precision = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
+        double recall = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
+        return 2 * ((precision * recall) / (precision + recall));
+    }
+
+    public double getNegativePrecision() {
+        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
+    }
+
+    public double getNegativeRecall() {
+        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
     }
 
     // ===== TESTING AND TRAINING =====
@@ -109,8 +139,20 @@ public class ANN {
         // Feedforward
         feedforward();
 
+        // Check if the output layer node is correct and update the confusion matrix
         if (outputLayerNode >= 0.5 && target == 1.0 || outputLayerNode < 0.5 && target == 0.0) {
             this.correct++;
+            if (outputLayerNode >= 0.5 && target == 1.0) {
+                this.confusionMatrix[0][0]++;
+            } else {
+                this.confusionMatrix[1][1]++;
+            }
+        } else {
+            if (outputLayerNode >= 0.5 && target == 0.0) {
+                this.confusionMatrix[0][1]++;
+            } else {
+                this.confusionMatrix[1][0]++;
+            }
         }
 
         this.total++;
@@ -167,12 +209,12 @@ public class ANN {
         if (this.errorChanged) {
             noChangeCount++;
             if (doPrinting)
-                System.out.println(String.format(" %-19s \u001B[31m%.4f", epoch,
+                System.out.println("   " + String.format(" %-19s \u001B[31m%.4f", epoch,
                         averageError) + "\u001B[0m");
         } else {
             noChangeCount = 0;
             if (doPrinting)
-                System.out.println(String.format(" %-19s \u001B[32m%.4f", epoch,
+                System.out.println("   " + String.format(" %-19s \u001B[32m%.4f", epoch,
                         averageError) + "\u001B[0m");
         }
 
@@ -194,6 +236,10 @@ public class ANN {
             } else {
                 test(testNoRecurrence.remove(random.nextInt(testNoRecurrence.size())), 0.0);
             }
+        }
+
+        while (testNoRecurrence.size() > 0) {
+            test(testNoRecurrence.remove(random.nextInt(testNoRecurrence.size())), 0.0);
         }
 
     }
@@ -379,7 +425,8 @@ public class ANN {
                     hiddenBiasWeights[j] = randomInitilization();
                 }
             }
-            this.errors[i] = 0.0;
+            if (i < this.errors.length)
+                this.errors[i] = 0.0;
         }
 
         // Initialize output weights
@@ -436,24 +483,39 @@ public class ANN {
             testNoRecurrence.add(no_recurrence.remove(0));
         }
 
+        while (no_recurrence.size() > 0) {
+            testNoRecurrence.add(no_recurrence.remove(0));
+        }
+
     }
 
     // ===== PRINT FUNCTIONS =====
     // ===========================
     private void printHeader() {
         if (doPrinting) {
+            System.out.println("     _    _   _ _   _ ");
+            System.out.println("    / \\  | \\ | | \\ | |");
+            System.out.println("   / _ \\ |  \\| |  \\| |");
+            System.out.println("  / ___ \\| |\\  | |\\  |");
+            System.out.println(" /_/   \\_\\_| \\_|_| \\_|");
             System.out.println("\n===== Artificial Neural Network =====");
             System.out.println("=====================================");
             System.out.println("------------ Parameters ------------- ");
             System.out.println("Learning Rate              " + this.learningRate);
             System.out.println("Hidden Layer Size          " + this.hiddenLayerSize);
             System.out
-                    .println("Training Percentage        " + String.format("%.1f", (this.trainPercentage * 100)) + "%");
-            System.out.println("Max Train Epochs           " + this.maxTrainEpochs);
+                    .println("Training Percentage        " + String.format("%.1f", (this.trainPercentage * 100))
+                            + "% \u001B[2m // Percent of total \"recurrent\" instances used.\u001B[0m");
+            System.out.println("Max Train Epochs           " + this.maxTrainEpochs
+                    + "\u001B[2m     // ^ This is matched with equal \"non-recurrent\" instances.\u001B[0m");
             System.out.println("Max Epochs Without Change  " + this.maxNoChange);
             System.out.println("No Change Tolerance        " + this.noChangeTolerance);
             System.out.println("=====================================");
             System.out.println("------------- Training --------------");
+            System.out
+                    .println(String.format("  %-24s", "Datasets")
+                            + (trainRecurrence.size() + trainNoRecurrence.size()));
+            System.out.println("-------------------------------------");
             System.out.println("  Epoch                  Error       \n");
         }
     }
@@ -462,11 +524,43 @@ public class ANN {
         if (doPrinting) {
             System.out.println("=====================================");
             System.out.println("------------- Testing ---------------");
+
             System.out.println(String.format("%-27s", "Datasets") + total);
-            System.out.println(String.format("%-31s", "Correct:Incorrect\u001B[32m") + correct + "\u001B[0m:\u001B[31m"
+            System.out.println(String.format("%-44s", "\u001B[32mCorrect\u001B[0m:\u001B[31mIncorrect\u001B[32m")
+                    + correct + "\u001B[0m:\u001B[31m"
                     + (total - correct) + "\u001B[0m");
+            System.out.println("=====================================");
+            System.out.println("------------- Findings --------------");
+            System.out.println(String.format("%-26s", "| True Positive") + confusionMatrix[0][0]
+                    + "\u001B[2m     // recurrence events correctly classified \u001B[0m");
+            System.out.println(String.format("%-26s", "| True Negative") + confusionMatrix[1][1]
+                    + "\u001B[2m    // non-recurrence events correctly classified \u001B[0m");
+            System.out.println(String.format("%-26s", "| False Positive") + confusionMatrix[0][1]
+                    + "\u001B[2m     // non-recurrence events incorrectly classified \u001B[0m");
+            System.out.println(String.format("%-26s", "| False Negative") + confusionMatrix[1][0]
+                    + "\u001B[2m      // recurrence events incorrectly classified \u001B[0m");
+
+            System.out.println("-------------------------------------");
+            System.out.println(" --- Positive ---");
+            System.out.println(
+                    String.format("%-26s", "Positive Precision") + String.format("%.2f", getBinaryPrecision() * 100));
+
+            System.out.println(String.format("%-26s", "Positive Recall") + String.format("%.2f", getRecall() * 100));
+
+            System.out
+                    .println(String.format("%-26s", "Positive F-Measure") + String.format("%.2f", getFMeasure() * 100));
+
+            System.out.println("\n --- Negative ---");
+            System.out.println(
+                    String.format("%-26s", "Negative Precision") + String.format("%.2f", getNegativePrecision() * 100));
+            System.out.println(
+                    String.format("%-26s", "Negative Recall") + String.format("%.2f", getNegativeRecall() * 100));
+            System.out.println(
+                    String.format("%-26s", "Negative F-Measure") + String.format("%.2f", getNegativeFMeasure() * 100));
+            System.out.println("\n --- Accuracy ---");
             System.out.println(String.format("%-26s", "Accuracy") + String.format("%.2f", getAccuracy() * 100)
                     + "%");
+
             System.out.println("=====================================\n");
         }
     }
