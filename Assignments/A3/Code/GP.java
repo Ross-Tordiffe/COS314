@@ -56,8 +56,12 @@ public class GP {
             trainGP();
             if (bestFitness > oldFitness) {
                 noChange = 0;
+                if (doPrinting)
+                    System.out.println(" \u001B[32m^ " + String.format("%.1f", bestFitness * 100) + "%\u001B[0m");
             } else {
                 noChange++;
+                if (doPrinting)
+                    System.out.println(" \u001B[2m= " + String.format("%.1f", bestFitness * 100) + "%\u001B[0m");
             }
             generation++;
         }
@@ -105,11 +109,11 @@ public class GP {
         if (newFitness > currentFitness) {
             population = newPopulation;
             if (doPrinting)
-                System.out.println("    " + String.format(" %-19s \u001B[32m%.1f", generation,
+                System.out.print("    " + String.format(" %-15s \u001B[32m%.1f", generation,
                         (newFitness * 100)) + "%\u001B[0m");
         } else {
             if (doPrinting)
-                System.out.println("    " + String.format(" %-19s \u001B[31m%.1f", generation,
+                System.out.print("    " + String.format(" %-15s \u001B[31m%.1f", generation,
                         (newFitness * 100)) + "%\u001B[0m");
         }
 
@@ -321,7 +325,7 @@ public class GP {
             System.out.println("------------- Training --------------");
             System.out.println(String.format("  %-24s", "Datasets") + trainingSet.size());
             System.out.println("-------------------------------------");
-            System.out.println("  Evolution         Average Accuracy\n");
+            System.out.println("  Evolution        Average | Best\n");
         }
     }
 
