@@ -59,6 +59,7 @@ public class ANN {
 
     // ===== CONSTRUCTOR =====
     // =======================
+
     public ANN(ArrayList<double[]> dataMatrix, ArrayList<Double> outcomes, Random seededRandom) {
 
         this.random = seededRandom;
@@ -77,6 +78,7 @@ public class ANN {
 
     // ===== GETTERS =====
     // ===================
+
     /**
      * @brief Returns the accuracy of the network using the number of correct
      *        intances and the total number of instances.
@@ -86,22 +88,35 @@ public class ANN {
         return (double) correct / total;
     }
 
+    /**
+     * @brief Returns F-Measure of the network using the confusion matrix
+     * @return confusionMatrix
+     */
     public double getFMeasure() {
         double precision = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
         double recall = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
         return 2 * ((precision * recall) / (precision + recall));
     }
 
+    /**
+     * @brief Returns the precision of the network using the confusion matrix
+     * @return confusionMatrix
+     */
     public double getBinaryPrecision() {
         return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
     }
 
+    /**
+     * @brief Returns the recall of the network using the confusion matrix
+     * @return
+     */
     public double getRecall() {
         return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
     }
 
     // ===== TESTING AND TRAINING =====
     // ================================
+
     /**
      * @brief Trains the neural network on a given data set with a target value
      * 
@@ -240,6 +255,7 @@ public class ANN {
 
     // ===== FEEDFORWARD AND BACKPROPAGATION =====
     // ===========================================
+
     /**
      * @brief Performs the feedforward on the neural network
      */
@@ -309,6 +325,7 @@ public class ANN {
 
     // ===== ACTIVATION FUNCTIONS =====
     // ================================
+
     /**
      * @brief ReLU activation function
      * 
@@ -363,6 +380,7 @@ public class ANN {
 
     // ===== ERROR CALCULATIONS =====
     // ==============================
+
     /**
      * @brief alculate the error information for the output layer using the sigmoid
      *        derivative
@@ -397,6 +415,7 @@ public class ANN {
 
     // ===== DATA ORGANISATION =====
     // =============================
+
     /**
      * @brief Create the network layers and initialize the weights
      */

@@ -107,6 +107,11 @@ public class Helper {
         return instance;
     }
 
+    /**
+     * @brief returns a matrix of one hot encoded data
+     * @param instance
+     * @return
+     */
     private static double[] fillOneHot(double[] instance) {
 
         double[] oneHot = new double[TOTAL_ATTRIBUTES];
@@ -129,50 +134,6 @@ public class Helper {
         // printDataInstance(oneHot);
 
         return oneHot;
-    }
-
-    public static void printDataMatrix(double[][] dataMatrix, String[][] lineMatrix) {
-
-        for (int i = 0; i < dataMatrix.length; i++) {
-            System.out.print(i + ": [");
-            for (int j = 0; j < lineMatrix[i].length; j++) {
-                System.out.print(lineMatrix[i][j]);
-                if (j != lineMatrix[i].length - 1) {
-                    System.out.print(", ");
-                }
-            }
-            System.out.println("]");
-            System.out.print("    [");
-            for (int j = 0; j < dataMatrix[i].length; j++) {
-                System.out.print(dataMatrix[i][j]);
-                if (j != dataMatrix[i].length - 1) {
-                    System.out.print(", ");
-                }
-            }
-            System.out.println("]");
-        }
-    }
-
-    public static void printDataString(String[] data) {
-        System.out.print("[");
-        for (int i = 0; i < data.length; i++) {
-            System.out.print(data[i]);
-            if (i != data.length - 1) {
-                System.out.print(", ");
-            }
-        }
-        System.out.println("]");
-    }
-
-    public static void printDataInstance(double[] data) {
-        System.out.print("[");
-        for (int i = 0; i < data.length; i++) {
-            System.out.print(data[i]);
-            if (i != data.length - 1) {
-                System.out.print(", ");
-            }
-        }
-        System.out.println("]");
     }
 
     /**

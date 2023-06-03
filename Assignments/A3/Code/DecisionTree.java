@@ -28,6 +28,7 @@ public class DecisionTree extends Helper {
 
     // ===== CONSTRUCTORS =====
     // =======================
+
     // Default constructor
     public DecisionTree(int maxDepth, Random seededRandom, boolean full) {
         this.maxDepth = maxDepth;
@@ -62,40 +63,71 @@ public class DecisionTree extends Helper {
     // ===== Getters =====
     // ===================
 
+    /**
+     * @brief Returns the root node of the tree
+     * 
+     * @return root
+     */
     public Node getRoot() {
         return root;
     }
 
+    /**
+     * @brief Returns the fitness of the tree
+     * 
+     * @return fitness
+     */
     public double getFitness() {
         return fitness;
     }
 
+    /**
+     * @brief Returns the number of correct classifications
+     * 
+     * @return correct
+     */
     public int getCorrect() {
         return correct;
     }
 
-    public boolean isFull() {
-        return full;
-    }
-
+    /**
+     * @brief Returns the confusion matrix
+     * @return confusionMatrix
+     */
     public int[][] getConfusionMatrix() {
         return confusionMatrix;
     }
 
+    /**
+     * @brief Returns the binary precision (positive predictive value)
+     * @return binaryPrecision
+     */
     public double getBinaryPrecision() {
         return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
     }
 
+    /**
+     * @brief Returns the recall (true positive rate)
+     * @return binaryRecall
+     */
     public double getRecall() {
         return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
     }
 
+    /**
+     * @brief Returns the F-Measure
+     * @return fMeasure
+     */
     public double getFMeasure() {
         double precision = getBinaryPrecision();
         double recall = getRecall();
         return 2 * ((precision * recall) / (precision + recall));
     }
 
+    /**
+     * @brief Finds a random node in the tree (excluding the root)
+     * @return node
+     */
     public Node getRandomNode() {
 
         // Get a node and its depth
@@ -118,14 +150,15 @@ public class DecisionTree extends Helper {
         return node;
     }
 
-    // ===== Clone Method =====
-    // ========================
-    public DecisionTree copy() {
-        return new DecisionTree(root.copy(), maxDepth, seededRandom, full);
-    }
-
     // ===== Tree Build Methods =====
     // ==============================
+
+    /**
+     * @brief Builds a tree recursively
+     * @param availableAttributes
+     * @param depth
+     * @return node
+     */
     private Node buildTree(ArrayList<AttributeInformation> availableAttributes, int depth) {
 
         // If max depth is reached OR it is a grow tree, the depth is greater than 0 and
@@ -146,6 +179,13 @@ public class DecisionTree extends Helper {
         }
     }
 
+    /**
+     * @brief Creates a chance (non-terminal) node with a random attribute and
+     *        children
+     * @param availableAttributes
+     * @param depth
+     * @return chanceNode
+     */
     private ChanceNode createChanceNode(ArrayList<AttributeInformation> availableAttributes, int depth) {
         // Choose a random attribute and remove it from the list
         int attributeIndex = seededRandom.nextInt(availableAttributes.size());
@@ -165,6 +205,11 @@ public class DecisionTree extends Helper {
     // ===== Genetic Operations =====
     // ==============================
 
+    /**
+     * @brief Performs crossover between this tree and another tree
+     * @param otherTree
+     * @param crossDepth
+     */
     public void crossover(DecisionTree otherTree, int crossDepth) {
         Node thisNode = getRandomNode();
         Node otherNode = otherTree.getRandomNode();
@@ -193,6 +238,10 @@ public class DecisionTree extends Helper {
                 crossDepth));
     }
 
+    /**
+     * @brief Mutate by growing. Replace a terminal node with a subtree
+     * @param mutationDepth
+     */
     public void growMutate(int mutationDepth) {
         Node node = getRandomNode();
         ChanceNode parent = (ChanceNode) node.getParent();
@@ -204,6 +253,10 @@ public class DecisionTree extends Helper {
                 checkPrune(subtree.getRoot(), startDepth, mutationDepth));
     }
 
+    /**
+     * @brief Mutate by shrinking. Replace a node with a terminal node
+     * @param mutationDepth
+     */
     public void shrinkMutate(int mutationDepth) {
         Node node = getRandomNode();
         ChanceNode parent = (ChanceNode) node.getParent();
@@ -282,6 +335,7 @@ public class DecisionTree extends Helper {
 
     // ===== Helper Methods =====
     // ==========================
+
     /**
      * @brief Creates a list of the attribute names and their possible values
      * 
@@ -304,6 +358,10 @@ public class DecisionTree extends Helper {
         return attributeList;
     }
 
+    /**
+     * @brief Adds a node and all of its children to the allNodes list
+     * @param node
+     */
     private void addToAllNodesList(Node node) {
         allNodes.add(node);
         if (node instanceof ChanceNode) {
@@ -313,6 +371,10 @@ public class DecisionTree extends Helper {
         }
     }
 
+    /**
+     * @brief Removes a node and all of its children from the allNodes list
+     * @param node
+     */
     private void removeFromAllNodesList(Node node) {
         allNodes.remove(node);
         if (node instanceof ChanceNode) {
@@ -320,6 +382,14 @@ public class DecisionTree extends Helper {
                 removeFromAllNodesList(child);
             }
         }
+    }
+
+    /**
+     * @brief Creates a copy of the tree
+     * @return copy
+     */
+    public DecisionTree copy() {
+        return new DecisionTree(root.copy(), maxDepth, seededRandom, full);
     }
 
     public void printTree() {

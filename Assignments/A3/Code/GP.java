@@ -38,6 +38,7 @@ public class GP {
 
     // ===== Constructor =====
     // =======================
+
     public GP(ArrayList<String[]> dataMatrix, Random seededRandom) {
 
         this.seededRandom = seededRandom;
@@ -69,6 +70,10 @@ public class GP {
 
     // ===== Training and Testing ====
     // ===============================
+
+    /**
+     * @brief Train a generation of the GP on the training set
+     */
     private void trainGP() {
 
         double currentFitness = evaluatePopulation(population, trainingSet);
@@ -110,6 +115,9 @@ public class GP {
 
     }
 
+    /**
+     * @brief Test the best tree on the test set
+     */
     private void testGP() {
         double fitness = bestTree.evaluate(testSet) * 100.0;
     }
@@ -117,6 +125,11 @@ public class GP {
     // ===== Selection =====
     // =====================
 
+    /**
+     * @brief Select a parent from the population using tournament selection
+     * @param population
+     * @return The selected parent
+     */
     private DecisionTree tournamentSelection(ArrayList<DecisionTree> population) {
 
         // Create a tournament
@@ -141,6 +154,12 @@ public class GP {
     // ===== Genetic Operations =====
     // ==============================
 
+    /**
+     * @brief Crossover two trees
+     * @param parent1
+     * @param parent2
+     * @return The two children
+     */
     private DecisionTree[] crossover(DecisionTree parent1, DecisionTree parent2) {
 
         // Create the new children
@@ -155,6 +174,12 @@ public class GP {
         return children;
     }
 
+    /**
+     * @brief Mutate two trees
+     * @param parent1
+     * @param parent2
+     * @return The two children
+     */
     private DecisionTree[] mutate(DecisionTree parent1, DecisionTree parent2) {
 
         // Create the new children
@@ -176,6 +201,11 @@ public class GP {
 
     // ===== Population Generation =====
     // =================================
+
+    /**
+     * @brief Generate the initial population of the GP
+     * @return The initial population
+     */
     private ArrayList<DecisionTree> generatePopulation() {
         ArrayList<DecisionTree> population = new ArrayList<DecisionTree>();
         int growSize = (int) (populationSize * halfAndHalfRate);
@@ -198,6 +228,13 @@ public class GP {
 
     // ===== Evaluation Methods =====
     // ==============================
+
+    /**
+     * @brief Evaluate the whole population
+     * @param population
+     * @param trainSet
+     * @return
+     */
     private double evaluatePopulation(ArrayList<DecisionTree> population, ArrayList<String[]> trainSet) {
         double totalFitness = 0;
         for (DecisionTree tree : population) {
@@ -213,6 +250,10 @@ public class GP {
 
     // ===== DATA ORGANISATION =====
     // =============================
+
+    /**
+     * @brief Organise the data into training and test sets
+     */
     private void organiseData() {
 
         // Split the data into recurrence-events and no-recurrence-events
