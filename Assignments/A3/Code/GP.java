@@ -99,11 +99,13 @@ public class GP {
         double newFitness = evaluatePopulation(newPopulation, trainingSet);
         if (newFitness > currentFitness) {
             population = newPopulation;
-            System.out.println("    " + String.format(" %-19s \u001B[32m%.1f", generation,
-                    (newFitness * 100)) + "%\u001B[0m");
+            if (doPrinting)
+                System.out.println("    " + String.format(" %-19s \u001B[32m%.1f", generation,
+                        (newFitness * 100)) + "%\u001B[0m");
         } else {
-            System.out.println("    " + String.format(" %-19s \u001B[31m%.1f", generation,
-                    (newFitness * 100)) + "%\u001B[0m");
+            if (doPrinting)
+                System.out.println("    " + String.format(" %-19s \u001B[31m%.1f", generation,
+                        (newFitness * 100)) + "%\u001B[0m");
         }
 
     }
@@ -306,32 +308,29 @@ public class GP {
                     + "\u001B[2m      // recurrence events incorrectly classified \u001B[0m");
 
             System.out.println("-------------------------------------");
-            System.out.println(" --- Positive ---");
+            System.out.println("");
             System.out.println(
-                    String.format("%-26s", "Positive Precision")
+                    String.format("%-26s", "Precision")
                             + String.format("%.2f", this.bestTree.getBinaryPrecision() * 100));
 
             System.out.println(
-                    String.format("%-26s", "Positive Recall") + String.format("%.2f", this.bestTree.getRecall() * 100));
+                    String.format("%-26s", "Recall") + String.format("%.2f", this.bestTree.getRecall() * 100));
 
             System.out
-                    .println(String.format("%-26s", "Positive F-Measure")
+                    .println(String.format("%-26s", "F-Measure")
                             + String.format("%.2f", this.bestTree.getFMeasure() * 100));
-
-            System.out.println("\n --- Negative ---");
-            System.out.println(
-                    String.format("%-26s", "Negative Precision")
-                            + String.format("%.2f", this.bestTree.getNegativePrecision() * 100));
-            System.out.println(
-                    String.format("%-26s", "Negative Recall")
-                            + String.format("%.2f", this.bestTree.getNegativeRecall() * 100));
-            System.out.println(
-                    String.format("%-26s", "Negative F-Measure")
-                            + String.format("%.2f", this.bestTree.getNegativeFMeasure() * 100));
-            System.out.println("\n --- Accuracy ---");
+            System.out.println("");
             System.out.println(String.format("%-26s", "Accuracy")
                     + String.format("%.2f", this.bestTree.getFitness() * 100) + "%");
             System.out.println("=====================================\n");
         }
+    }
+
+    public double getAccuracy() {
+        return this.bestTree.getFitness();
+    }
+
+    public DecisionTree getBestTree() {
+        return this.bestTree;
     }
 }

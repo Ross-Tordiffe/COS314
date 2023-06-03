@@ -82,12 +82,6 @@ public class DecisionTree extends Helper {
         return confusionMatrix;
     }
 
-    public double getFMeasure() {
-        double precision = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
-        double recall = (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
-        return 2 * ((precision * recall) / (precision + recall));
-    }
-
     public double getBinaryPrecision() {
         return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[1][0]);
     }
@@ -96,18 +90,10 @@ public class DecisionTree extends Helper {
         return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
     }
 
-    public double getNegativeFMeasure() {
-        double precision = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
-        double recall = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
+    public double getFMeasure() {
+        double precision = getBinaryPrecision();
+        double recall = getRecall();
         return 2 * ((precision * recall) / (precision + recall));
-    }
-
-    public double getNegativePrecision() {
-        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
-    }
-
-    public double getNegativeRecall() {
-        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
     }
 
     public Node getRandomNode() {

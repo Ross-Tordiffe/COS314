@@ -273,24 +273,15 @@ public class Helper {
         System.out.println(String.format("%-26s", "| False Negative") + 48
                 + "\u001B[2m      // recurrence events incorrectly classified \u001B[0m");
 
-        System.out.println("-------------------------------------");
-        System.out.println(" --- Positive ---");
+        System.out.println("");
         System.out.println(
-                String.format("%-26s", "Positive Precision") + String.format("%.2f", 0.513 * 100));
+                String.format("%-26s", "Precision") + String.format("%.2f", 0.513 * 100));
 
-        System.out.println(String.format("%-26s", "Positive Recall") + String.format("%.2f", 0.294 * 100));
+        System.out.println(String.format("%-26s", "Recall") + String.format("%.2f", 0.294 * 100));
 
         System.out
-                .println(String.format("%-26s", "Positive F-Measure") + String.format("%.2f", 0.374 * 100));
-
-        System.out.println("\n --- Negative ---");
-        System.out.println(
-                String.format("%-26s", "Negative Precision") + String.format("%.2f", 0.806 * 100));
-        System.out.println(
-                String.format("%-26s", "Negative Recall") + String.format("%.2f", 0.913 * 100));
-        System.out.println(
-                String.format("%-26s", "Negative F-Measure") + String.format("%.2f", 0.856 * 100));
-        System.out.println("\n --- Accuracy ---");
+                .println(String.format("%-26s", "F-Measure") + String.format("%.2f", 0.374 * 100));
+        System.out.println("");
         System.out.println(String.format("%-26s", "Accuracy") + String.format("%.2f", 0.765734 * 100)
                 + "%");
 

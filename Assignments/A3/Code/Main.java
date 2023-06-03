@@ -11,11 +11,8 @@ public class Main extends Helper {
         ArrayList<double[]> hotOneEncodedDataMatrix = getHotDataMatrix();
         ArrayList<String[]> stringDataMatrix = getStringDataMatrix();
         ArrayList<Double> outcomes = getOutcomes();
-
-        double ANNSeed = 0.6937930107365077;
+        double ANNSeed = 0.24695376375475064;
         double GPSeed = 0.3871152302052989;
-
-        double rndSeed = Math.random();
 
         Random seededRandomANN = new Random(Double.doubleToLongBits(ANNSeed));
         ANN ann = new ANN(hotOneEncodedDataMatrix, outcomes, seededRandomANN);

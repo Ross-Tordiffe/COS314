@@ -42,12 +42,20 @@ public class ANN {
     private Random random;
 
     // Parameters
-    private final double learningRate = 0.08;
+    // private final double learningRate = 0.08;
+    // private final double trainPercentage = 0.8;
+    // private final int hiddenLayerSize = 51;
+    // private final int maxTrainEpochs = 50;
+    // private final int maxNoChange = 5;
+    // private final double noChangeTolerance = 0.08;
+    // private final double weightRange = 0.08;
+    private final double learningRate = 0.01;
     private final double trainPercentage = 0.8;
-    private final int hiddenLayerSize = 51;
+    private final int hiddenLayerSize = 7;
     private final int maxTrainEpochs = 50;
-    private final int maxNoChange = 5;
-    private final double noChangeTolerance = 0.08;
+    private final int maxNoChange = 11;
+    private final double noChangeTolerance = 0.05;
+    private final double weightRange = 0.07;
 
     // ===== CONSTRUCTOR =====
     // =======================
@@ -90,20 +98,6 @@ public class ANN {
 
     public double getRecall() {
         return (double) confusionMatrix[0][0] / (confusionMatrix[0][0] + confusionMatrix[0][1]);
-    }
-
-    public double getNegativeFMeasure() {
-        double precision = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
-        double recall = (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
-        return 2 * ((precision * recall) / (precision + recall));
-    }
-
-    public double getNegativePrecision() {
-        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[0][1]);
-    }
-
-    public double getNegativeRecall() {
-        return (double) confusionMatrix[1][1] / (confusionMatrix[1][1] + confusionMatrix[1][0]);
     }
 
     // ===== TESTING AND TRAINING =====
@@ -445,7 +439,7 @@ public class ANN {
      * @return random gaussian number
      */
     private double randomInitilization() {
-        double gaussian = random.nextGaussian() * 0.08;
+        double gaussian = random.nextGaussian() * weightRange;
         return gaussian;
     }
 
@@ -541,23 +535,15 @@ public class ANN {
                     + "\u001B[2m      // recurrence events incorrectly classified \u001B[0m");
 
             System.out.println("-------------------------------------");
-            System.out.println(" --- Positive ---");
+            System.out.println("");
             System.out.println(
-                    String.format("%-26s", "Positive Precision") + String.format("%.2f", getBinaryPrecision() * 100));
+                    String.format("%-26s", "Precision") + String.format("%.2f", getBinaryPrecision() * 100));
 
-            System.out.println(String.format("%-26s", "Positive Recall") + String.format("%.2f", getRecall() * 100));
+            System.out.println(String.format("%-26s", "Recall") + String.format("%.2f", getRecall() * 100));
 
             System.out
-                    .println(String.format("%-26s", "Positive F-Measure") + String.format("%.2f", getFMeasure() * 100));
-
-            System.out.println("\n --- Negative ---");
-            System.out.println(
-                    String.format("%-26s", "Negative Precision") + String.format("%.2f", getNegativePrecision() * 100));
-            System.out.println(
-                    String.format("%-26s", "Negative Recall") + String.format("%.2f", getNegativeRecall() * 100));
-            System.out.println(
-                    String.format("%-26s", "Negative F-Measure") + String.format("%.2f", getNegativeFMeasure() * 100));
-            System.out.println("\n --- Accuracy ---");
+                    .println(String.format("%-26s", "F-Measure") + String.format("%.2f", getFMeasure() * 100));
+            System.out.println("");
             System.out.println(String.format("%-26s", "Accuracy") + String.format("%.2f", getAccuracy() * 100)
                     + "%");
 
